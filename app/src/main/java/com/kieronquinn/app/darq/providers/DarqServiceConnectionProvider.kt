@@ -17,12 +17,9 @@ import com.kieronquinn.app.darq.utils.extensions.isShizukuInstalled
 import com.kieronquinn.app.darq.utils.extensions.suspendCoroutineWithTimeout
 import com.topjohnwu.superuser.Shell
 import com.topjohnwu.superuser.ipc.RootService
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
-import kotlinx.coroutines.withContext
 import rikka.shizuku.Shizuku
 import rikka.shizuku.Shizuku.UserServiceArgs
 import kotlin.coroutines.resume
@@ -61,59 +58,86 @@ class DarqServiceConnectionProvider(private val context: Context, private val se
     suspend fun getService(): ServiceResult {
         return serviceLock.withLock {
             withContext(Dispatchers.Main) {
-                getServiceLocked() ?: ServiceResult.Failed(ServiceFailureReason.TIMEOUT)
+                getServiceLocked()
             }
         }
     }
 
-    private suspend fun getServiceLocked() = suspendCoroutineWithTimeout<ServiceResult>(
-        SERVICE_TIMEOUT
-    ) {
-        rootService?.let { service ->
-            try {
-                service.ping()
-                it.resume(ServiceResult.Success(service, serviceType))
-                return@suspendCoroutineWithTimeout
-            }catch (e: DeadObjectException){
-                //Service has died but onServiceDisconnected has not been called, restart as normal
-            }
-        }
-        val serviceConnection = object: ServiceConnection {
-            override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
+    private suspend fun getServiceLocked(): ServiceResult = withTimeoutOrNull(SERVICE_TIMEOUT) {
+        suspendCancellableCoroutine<ServiceResult> { continuation ->
+            rootService?.let { service ->
                 try {
-                    val rootService = IDarqService.Stub.asInterface(service)
-                    rootService.setupService()
-                    this@DarqServiceConnectionProvider.rootService = rootService
-                    it.resume(ServiceResult.Success(rootService, serviceType))
-                }catch (e: DeadObjectException){
-                    it.resume(ServiceResult.Failed(ServiceFailureReason.TIMEOUT))
+                    service.ping()
+                    if (continuation.isActive) {
+                        continuation.resume(ServiceResult.Success(service, serviceType))
+                    }
+                    return@suspendCancellableCoroutine
+                } catch (e: Exception) {
+                    // Service died
                 }
             }
 
-            override fun onServiceDisconnected(name: ComponentName?) {
-                rootService = null
-            }
-        }
-        if (Shell.rootAccess()) {
-            //libsu:service doesn't re-bind so we have to stop & start
-            RootService.stop(rootServiceIntent)
-            RootService.bind(rootServiceIntent, serviceConnection)
-        } else if(context.isShizukuInstalled()) {
-            GlobalScope.launch {
-                runCatching {
-                    if (Shizuku.checkSelfPermission() == PackageManager.PERMISSION_GRANTED) {
-                        Shizuku.bindUserService(darqProcessArgs, serviceConnection)
-                    } else {
-                        it.resume(ServiceResult.Failed(ServiceFailureReason.SHIZUKU_PERMISSION_REQUIRED))
+            val serviceConnection = object : ServiceConnection {
+                override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
+                    try {
+                        val rootService = IDarqService.Stub.asInterface(service)
+                        rootService.setupService()
+                        this@DarqServiceConnectionProvider.rootService = rootService
+                        if (continuation.isActive) {
+                            continuation.resume(ServiceResult.Success(rootService, serviceType))
+                        }
+                    } catch (e: Exception) {
+                        if (continuation.isActive) {
+                            continuation.resume(ServiceResult.Failed(ServiceFailureReason.TIMEOUT))
+                        }
                     }
-                }.onFailure { e ->
-                    it.resume(ServiceResult.Failed(ServiceFailureReason.SHIZUKU_NOT_STARTED))
+                }
+
+                override fun onServiceDisconnected(name: ComponentName?) {
+                    rootService = null
                 }
             }
-        } else {
-            it.resume(ServiceResult.Failed(ServiceFailureReason.SHIZUKU_NOT_INSTALLED))
+
+            continuation.invokeOnCancellation {
+                try {
+                    if (Shell.rootAccess()) {
+                        RootService.unbind(serviceConnection)
+                    } else if (context.isShizukuInstalled()) {
+                        Shizuku.unbindUserService(darqProcessArgs, serviceConnection, true)
+                    }
+                } catch (e: Exception) {
+                    // Ignore
+                }
+            }
+
+            if (Shell.rootAccess()) {
+                serviceType = ServiceType.ROOT
+                RootService.stop(rootServiceIntent)
+                RootService.bind(rootServiceIntent, serviceConnection)
+            } else if (context.isShizukuInstalled()) {
+                serviceType = ServiceType.SHIZUKU
+                GlobalScope.launch {
+                    runCatching {
+                        if (Shizuku.checkSelfPermission() == PackageManager.PERMISSION_GRANTED) {
+                            Shizuku.bindUserService(darqProcessArgs, serviceConnection)
+                        } else {
+                            if (continuation.isActive) {
+                                continuation.resume(ServiceResult.Failed(ServiceFailureReason.SHIZUKU_PERMISSION_REQUIRED))
+                            }
+                        }
+                    }.onFailure {
+                        if (continuation.isActive) {
+                            continuation.resume(ServiceResult.Failed(ServiceFailureReason.SHIZUKU_NOT_STARTED))
+                        }
+                    }
+                }
+            } else {
+                if (continuation.isActive) {
+                    continuation.resume(ServiceResult.Failed(ServiceFailureReason.SHIZUKU_NOT_INSTALLED))
+                }
+            }
         }
-    }
+    } ?: ServiceResult.Failed(ServiceFailureReason.TIMEOUT)
 
     private fun IDarqService.setupService(){
         GlobalScope.launch {

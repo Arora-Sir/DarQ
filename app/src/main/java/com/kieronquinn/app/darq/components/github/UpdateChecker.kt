@@ -27,11 +27,24 @@ class UpdateChecker {
         private const val BASE_URL = "https://api.github.com/repos/KieronQuinn/DarQ/"
     }
 
+    private fun isNewerVersion(remoteTag: String, localTag: String): Boolean {
+        val remote = remoteTag.replace("v", "").split(".").mapNotNull { it.toIntOrNull() }
+        val local = localTag.replace("v", "").split(".").mapNotNull { it.toIntOrNull() }
+        val length = maxOf(remote.size, local.size)
+        for (i in 0 until length) {
+            val r = remote.getOrElse(i) { 0 }
+            val l = local.getOrElse(i) { 0 }
+            if (r > l) return true
+            if (r < l) return false
+        }
+        return false
+    }
+
     fun getLatestRelease() = callbackFlow {
         withContext(Dispatchers.IO){
             getReleaseList()?.let { gitHubReleaseResponse ->
                 val currentTag = gitHubReleaseResponse.tagName
-                if (currentTag != null && currentTag != BuildConfig.TAG_NAME) {
+                if (currentTag != null && isNewerVersion(currentTag, BuildConfig.TAG_NAME)) {
                     //New update available!
                     val asset =
                         gitHubReleaseResponse.assets?.firstOrNull { it.name?.endsWith(".apk") == true }

@@ -4,6 +4,7 @@ plugins {
 }
 
 android {
+    namespace 'com.kieronquinn.systemstubs'
     compileSdkVersion 32
     buildToolsVersion "30.0.3"
 

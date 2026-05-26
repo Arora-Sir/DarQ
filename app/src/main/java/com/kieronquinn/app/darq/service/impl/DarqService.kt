@@ -227,6 +227,14 @@ class DarqService(private val serviceType: DarqServiceConnectionProvider.Service
         override fun onProcessDied(pid: Int, uid: Int) {
             //Don't care
         }
+
+        override fun onProcessStarted(pid: Int, processUid: Int, packageUid: Int, packageName: String?, processName: String?) {
+            //Don't care
+        }
+
+        override fun onProcessStateChanged(pid: Int, uid: Int, procState: Int) {
+            //Don't care
+        }
     }
 
     private fun registerProcessObserver() {
