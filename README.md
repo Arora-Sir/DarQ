@@ -18,9 +18,20 @@ DarQ requires either **Root Access** or the **Shizuku** service to be running on
 
 ### Shizuku Setup (For Non-Rooted Devices)
 If your device is not rooted, you must set up **Shizuku** before running DarQ:
-1. Download and install **Shizuku** from the [Shizuku GitHub Repository](https://github.com/RikkaApps/Shizuku) or the [Google Play Store](https://play.google.com/store/apps/details?id=moe.shizuku.privileged.api).
+1. **Download Shizuku:**
+   * **Recommended (Modded Fork):** Download and install the [thedjchi Shizuku Fork](https://github.com/thedjchi/Shizuku/releases). This version is actively maintained and highly recommended for custom, aggressive OEM skins (such as Xiaomi/HyperOS, OPPO/ColorOS, etc.) because it includes:
+     * A **Watchdog service** that automatically restarts Shizuku's background process if it gets killed by the system.
+     * Robust boot startup logic (e.g., waiting for Wi-Fi connection).
+     * Quality-of-life patches like ADB-over-TCP settings and intent controls.
+   * **Original Version:** Alternatively, you can install the original version from the [Google Play Store](https://play.google.com/store/apps/details?id=moe.shizuku.privileged.api) or the [RikkaApps Shizuku GitHub Repository](https://github.com/RikkaApps/Shizuku).
 2. Open Shizuku and follow the in-app guide to start the service (using Wireless Debugging on Android 11+ or ADB command line on a computer).
 3. Once the Shizuku service is running, open DarQ and grant it Shizuku access when prompted.
+
+> [!IMPORTANT]
+> **Device-Specific Requirements:**
+> * **Xiaomi / Redmi / POCO:** You must enable **"USB Debugging (Security settings)"** in Developer Options, and set Shizuku's Battery Saver to **"No restrictions"** in system App Info.
+> * **OPPO / OnePlus / Realme:** You must enable the **"Disable permission monitoring"** (or **"Disable system optimization"** in newer builds) setting in Developer Options to prevent the OS from blocking the connection.
+
 
 DarQ also provides an option to apply the system dark theme (as well as selectable force dark) only after sunset and before sunrise, protecting your eyes when it's most needed. 
 
