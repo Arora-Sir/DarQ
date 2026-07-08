@@ -12,6 +12,7 @@ import com.kieronquinn.app.darq.R
 import com.kieronquinn.app.darq.model.shizuku.ShizukuConstants
 import com.kieronquinn.app.darq.providers.DarqServiceConnectionProvider
 import com.kieronquinn.app.darq.ui.activities.DarqActivity
+import com.kieronquinn.app.darq.utils.extensions.getShizukuLaunchIntent
 import org.koin.android.ext.android.inject
 
 class BootForegroundService : LifecycleService() {
@@ -40,7 +41,7 @@ class BootForegroundService : LifecycleService() {
     }
 
     private val shizukuLaunchIntent by lazy {
-        Intent(packageManager.getLaunchIntentForPackage(ShizukuConstants.SHIZUKU_PACKAGE_NAME)).let { notificationIntent ->
+        getShizukuLaunchIntent()?.let { notificationIntent ->
             val flags = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
                 PendingIntent.FLAG_IMMUTABLE
             } else {

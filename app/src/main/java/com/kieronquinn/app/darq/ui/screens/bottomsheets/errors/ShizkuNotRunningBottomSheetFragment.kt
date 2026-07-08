@@ -4,6 +4,7 @@ import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.kieronquinn.app.darq.R
 import com.kieronquinn.app.darq.model.shizuku.ShizukuConstants
 import com.kieronquinn.app.darq.ui.base.BaseBottomSheetDialogFragment
+import com.kieronquinn.app.darq.utils.extensions.getShizukuLaunchIntent
 
 class ShizkuNotRunningBottomSheetFragment: BaseBottomSheetDialogFragment() {
 
@@ -27,8 +28,9 @@ class ShizkuNotRunningBottomSheetFragment: BaseBottomSheetDialogFragment() {
 
     override fun onPositiveClicked(dialog: BottomSheetDialog) {
         super.onPositiveClicked(dialog)
-        val packageManager = requireContext().packageManager
-        startActivity(packageManager.getLaunchIntentForPackage(ShizukuConstants.SHIZUKU_PACKAGE_NAME))
+        requireContext().getShizukuLaunchIntent()?.let { launchIntent ->
+            startActivity(launchIntent)
+        }
     }
 
     override fun onNegativeClicked(dialog: BottomSheetDialog) {

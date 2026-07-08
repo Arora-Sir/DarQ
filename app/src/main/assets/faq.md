@@ -38,3 +38,15 @@ No. There is no customisation with force dark, so you cannot change the colours.
 
 ## How can I keep DarQ up to date? Is DarQ available on the Play Store?
 DarQ is not on the Play Store, as it uses hidden APIs, which Google does not like. DarQ is instead available on GitHub, and will automatically check for updates when launched. If you would like to check manually, use the GitHub link on the main page of DarQ, and follow the "Releases" link.
+
+## Why does Force Dark not work on some apps?
+These apps are web wrappers (websites running inside a WebView component) rather than native Android applications. System-level Force Dark only affects native Android UI components. WebViews render web pages independently and do not automatically respect the system's force dark flag.
+
+## Why does upgrading from the official v2.2.1 release throw an "invalid package" error?
+Because this is a community-maintained fork, the APK is signed with a different private developer certificate than the original release. Android blocks upgrades with mismatched signatures for security reasons.
+To switch to this fork:
+1. Go to **Backup & Restore** in the old app and export your settings.
+2. Uninstall the official version.
+3. Install the latest version from this fork.
+4. Restore your settings from the backup.
+All future updates from this fork will install seamlessly as normal upgrades.
