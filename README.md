@@ -1,4 +1,4 @@
-# DarQ Reborn <a href="https://github.com/Arora-Sir/DarQ/releases"><img src="https://img.shields.io/github/downloads/Arora-Sir/DarQ/total?style=for-the-badge&color=bf7830&labelColor=805020" align="center" alt="Downloads"></a> <a href="https://github.com/Arora-Sir/DarQ/releases/latest"><img src="https://img.shields.io/github/v/release/Arora-Sir/DarQ?style=for-the-badge&color=3060bf&labelColor=204080&label=Latest" align="center" alt="Latest Release"></a>
+# DarQ Reborn <a href="https://github.com/Arora-Sir/DarQ-Reborn/releases"><img src="https://img.shields.io/github/downloads/Arora-Sir/DarQ-Reborn/total?style=for-the-badge&color=bf7830&labelColor=805020" align="center" alt="Downloads"></a> <a href="https://github.com/Arora-Sir/DarQ-Reborn/releases/latest"><img src="https://img.shields.io/github/v/release/Arora-Sir/DarQ-Reborn?style=for-the-badge&color=3060bf&labelColor=204080&label=Latest" align="center" alt="Latest Release"></a>
 
 
 ![DarQ](assets/darq_banner.png)
@@ -36,6 +36,6 @@ If your device is not rooted, you must set up **Shizuku** before running DarQ:
 
 DarQ also provides an option to apply the system dark theme (as well as selectable force dark) only after sunset and before sunrise, protecting your eyes when it's most needed. 
 
-Please read the Frequently Asked Questions sections in the app or [here](https://github.com/Arora-Sir/DarQ/blob/master/app/src/main/assets/faq.md) for more information and some answers to questions.
+Please read the Frequently Asked Questions sections in the app or [here](https://github.com/Arora-Sir/DarQ-Reborn/blob/master/app/src/main/assets/faq.md) for more information and some answers to questions.
 
-[Download from GitHub Releases](https://github.com/Arora-Sir/DarQ/releases)
+[Download from GitHub Releases](https://github.com/Arora-Sir/DarQ-Reborn/releases)
