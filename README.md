@@ -1,4 +1,5 @@
-# DarQ (Modded Fork)
+# DarQ Reborn <a href="https://github.com/Arora-Sir/DarQ/releases"><img src="https://img.shields.io/github/downloads/Arora-Sir/DarQ/total?style=for-the-badge&color=bf7830&labelColor=805020" align="center" alt="Downloads"></a> <a href="https://github.com/Arora-Sir/DarQ/releases/latest"><img src="https://img.shields.io/github/v/release/Arora-Sir/DarQ?style=for-the-badge&color=3060bf&labelColor=204080&label=Latest" align="center" alt="Latest Release"></a>
+
 
 ![DarQ](assets/darq_banner.png)
 

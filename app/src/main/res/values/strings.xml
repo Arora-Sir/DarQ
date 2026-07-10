@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">DarQ</string>
+    <string name="app_name">DarQ Reborn</string>
     <string name="xposed_desc">Prevent apps from disabling the use of Force Dark</string>
     <string name="item_switch_main_title">Enable DarQ</string>
     <string name="item_switch_main_subtitle">DarQ only works while the system is in dark mode</string>

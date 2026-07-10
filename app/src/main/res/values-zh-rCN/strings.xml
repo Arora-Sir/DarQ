@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">DarQ</string>
+    <string name="app_name">DarQ Reborn</string>
     <string name="xposed_desc">避免应用禁用强制深色模式</string>
     <string name="item_switch_main_title">启用 DarQ</string>
     <string name="item_switch_main_subtitle">QarQ 仅在系统使用深色模式时工作</string>
