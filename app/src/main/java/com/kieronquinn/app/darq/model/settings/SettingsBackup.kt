@@ -13,5 +13,6 @@ data class SettingsBackup(
     val xposedAggressiveDark: Boolean,
     val xposedInvertStatus: Boolean,
     val checkForUpdates: Boolean = true,
+    val persistentService: Boolean = false,
     val enabledApps: List<String>
 )

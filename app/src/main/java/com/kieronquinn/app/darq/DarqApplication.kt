@@ -3,7 +3,9 @@ package com.kieronquinn.app.darq
 import android.app.Application
 import android.app.DownloadManager
 import android.content.Context
+import android.content.Intent
 import android.util.Log
+import com.kieronquinn.app.darq.service.background.DarqPersistentService
 import com.kieronquinn.app.darq.components.github.UpdateChecker
 import com.kieronquinn.app.darq.components.navigation.Navigation
 import com.kieronquinn.app.darq.components.navigation.NavigationImpl
@@ -87,6 +89,15 @@ class DarqApplication : Application() {
         Log.d("DarQA", "ApplicationThread $applicationThread")
         Sui.init(packageName)
         setupMonet()
+        
+        val settings = get<DarqSharedPreferences>()
+        if (settings.persistentService) {
+            try {
+                startForegroundService(Intent(this, DarqPersistentService::class.java))
+            } catch (e: Exception) {
+                Log.e("DarQA", "Failed to start persistent service from Application context (likely background execution)", e)
+            }
+        }
     }
 
     private fun setupMonet(){

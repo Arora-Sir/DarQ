@@ -52,6 +52,11 @@
 			<property android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE" android:value="Background service to manage auto dark mode" />
 		</service>
 
+		<service android:name="com.kieronquinn.app.darq.service.background.DarqPersistentService"
+			android:foregroundServiceType="specialUse">
+			<property android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE" android:value="Persistent background service to keep connection alive" />
+		</service>
+
 		<receiver android:name="com.kieronquinn.app.darq.receivers.BootReceiver"
 			android:exported="false">
 			<intent-filter>

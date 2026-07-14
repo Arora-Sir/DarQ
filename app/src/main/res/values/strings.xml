@@ -19,6 +19,14 @@
     <string name="item_send_app_closes_content">Disables Force Dark when an app in the Force Dark list is closed. This leads to more instances where Force Dark may not be applied quickly enough to an app when switching between apps.</string>
     <string name="item_check_for_updates_title">Check for updates on launch</string>
     <string name="item_check_for_updates_content">Automatically check for new releases when opening the app and prompt to install them directly.</string>
+    <string name="item_advanced_group_theme_title">Theme &amp; Updates</string>
+    <string name="item_advanced_group_background_title">Background Performance &amp; Monitoring</string>
+    <string name="item_persistent_service_title">Keep service running in background</string>
+    <string name="item_persistent_service_content">Runs a low-priority foreground service to prevent the OS from killing DarQ and Shizuku. Highly recommended for OxygenOS, ColorOS, and HyperOS.</string>
+    <string name="item_persistent_notification_settings_title">Manage Notification</string>
+    <string name="item_persistent_notification_settings_content">Tap to minimize or hide the persistent background service notification in system settings.</string>
+    <string name="persistent_foreground_service_notification_title">DarQ Background Service</string>
+    <string name="persistent_foreground_service_notification_content">Monitoring foreground apps to apply dark mode.</string>
     <string name="item_header_about">About</string>
     <string name="item_about_faq_title">Frequently Asked Questions</string>
     <string name="item_about_title">DarQ v%1s</string>

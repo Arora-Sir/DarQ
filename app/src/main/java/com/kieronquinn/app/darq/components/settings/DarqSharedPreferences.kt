@@ -35,6 +35,9 @@ abstract class DarqSharedPreferences: BaseSharedPreferences() {
         private const val KEY_DEVELOPER_OPTIONS = "developer_options"
         private const val DEFAULT_DEVELOPER_OPTIONS = false
 
+        private const val KEY_PERSISTENT_SERVICE = "persistent_service"
+        private const val DEFAULT_PERSISTENT_SERVICE = false
+
         private const val KEY_XPOSED_AGGRESSIVE_DARK = "xposed_aggressive_dark"
         const val DEFAULT_XPOSED_AGGRESSIVE_DARK = true
 
@@ -57,6 +60,7 @@ abstract class DarqSharedPreferences: BaseSharedPreferences() {
     var useLocation by this.shared(KEY_USE_LOCATION, DEFAULT_USE_LOCATION)
     var checkForUpdates by this.shared(KEY_CHECK_FOR_UPDATES, DEFAULT_CHECK_FOR_UPDATES)
     var developerOptions by this.shared(KEY_DEVELOPER_OPTIONS, DEFAULT_DEVELOPER_OPTIONS)
+    var persistentService by this.shared(KEY_PERSISTENT_SERVICE, DEFAULT_PERSISTENT_SERVICE)
     var monetColor by this.shared(KEY_UI_MONET_COLOR, Integer.MAX_VALUE)
     var enabledApps by this.sharedJSONArray(KEY_ENABLED_APPS)
 
@@ -90,6 +94,7 @@ abstract class DarqSharedPreferences: BaseSharedPreferences() {
             xposedAggressiveDark = this.xposedAggressiveDark,
             xposedInvertStatus = this.xposedInvertStatus,
             checkForUpdates = this.checkForUpdates,
+            persistentService = this.persistentService,
             enabledApps = this.enabledApps.toList()
         )
     }
@@ -110,6 +115,7 @@ abstract class DarqSharedPreferences: BaseSharedPreferences() {
         xposedAggressiveDark = settingsBackup.xposedAggressiveDark
         xposedInvertStatus = settingsBackup.xposedInvertStatus
         checkForUpdates = settingsBackup.checkForUpdates
+        persistentService = settingsBackup.persistentService
         enabledApps = settingsBackup.enabledApps.toTypedArray()
         return@withContext (useLocation && autoDarkTheme) && !currentUseLocation
     }

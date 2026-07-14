@@ -6,7 +6,7 @@
 DarQ provides a per-app selectable force dark option for Android 10 and above.
 
 > [!NOTE]
-> This is a modded fork maintained by **Mohit Arora / Arora-Sir**. The original repository by [KieronQuinn](https://github.com/KieronQuinn/DarQ) is archived.
+> This is a modded fork maintained by [Mohit Arora](https://github.com/Arora-Sir). The original repository by [KieronQuinn](https://github.com/KieronQuinn/DarQ) is archived.
 
 > [!IMPORTANT]
 > **Upgrading from the Official Release (v2.2.1 or older):** Due to a signature mismatch from the transition to this fork, you **must uninstall the official version first** before installing updates from this repository. Future updates from this fork will upgrade directly as normal.
@@ -27,11 +27,11 @@ If your device is not rooted, you must set up **Shizuku** before running DarQ:
    * **Original Version:** Alternatively, you can install the original version from the [Google Play Store](https://play.google.com/store/apps/details?id=moe.shizuku.privileged.api) or the [RikkaApps Shizuku GitHub Repository](https://github.com/RikkaApps/Shizuku).
 2. Open Shizuku and follow the in-app guide to start the service (using Wireless Debugging on Android 11+ or ADB command line on a computer).
 3. Once the Shizuku service is running, open DarQ and grant it Shizuku access when prompted.
-
 > [!IMPORTANT]
-> **Device-Specific Requirements:**
+> **Device-Specific & Background Requirements:**
 > * **Xiaomi / Redmi / POCO:** You must enable **"USB Debugging (Security settings)"** in Developer Options, and set Shizuku's Battery Saver to **"No restrictions"** in system App Info.
 > * **OPPO / OnePlus / Realme:** You must enable the **"Disable permission monitoring"** (or **"Disable system optimization"** in newer builds) setting in Developer Options to prevent the OS from blocking the connection.
+> * **Background Service Termination (OnePlus / Oppo / Xiaomi):** If you find that you have to manually open DarQ to make apps dark again after a while, the system has killed the background DarQ process. Go to **Advanced Options** in the app, enable **"Keep service running in background"**, and click **"Manage Notification"** to hide or minimize the status bar icon if desired.
 
 
 DarQ also provides an option to apply the system dark theme (as well as selectable force dark) only after sunset and before sunrise, protecting your eyes when it's most needed. 
