@@ -2,6 +2,7 @@ package com.kieronquinn.app.darq.ui.screens.bottomsheets.update
 
 import android.app.NotificationChannel
 import android.app.NotificationManager
+import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
@@ -105,6 +106,46 @@ class UpdateDownloadBottomSheetViewModelImpl : UpdateDownloadBottomSheetViewMode
         nm.notify(NOTIFICATION_ID, notification)
     }
 
+    private fun showCompletedNotification(context: Context, uri: Uri) {
+        ensureNotificationChannel(context)
+        val nm = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val channel = NotificationChannel(
+                "update_downloads_complete",
+                "Update Complete",
+                NotificationManager.IMPORTANCE_HIGH
+            )
+            nm.createNotificationChannel(channel)
+        }
+
+        val installIntent = Intent(Intent.ACTION_VIEW, uri).apply {
+            putExtra(Intent.EXTRA_NOT_UNKNOWN_SOURCE, true)
+            setDataAndType(uri, "application/vnd.android.package-archive")
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_GRANT_READ_URI_PERMISSION
+        }
+
+        val pendingIntentFlags = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        } else {
+            PendingIntent.FLAG_UPDATE_CURRENT
+        }
+
+        val pendingIntent = PendingIntent.getActivity(context, 0, installIntent, pendingIntentFlags)
+
+        val notification = NotificationCompat.Builder(context, "update_downloads_complete")
+            .setContentTitle("Update Downloaded")
+            .setContentText("Tap to install the update")
+            .setSmallIcon(R.drawable.ic_notification)
+            .setContentIntent(pendingIntent)
+            .setAutoCancel(true)
+            .setPriority(NotificationCompat.PRIORITY_HIGH)
+            .build()
+
+        nm.cancel(NOTIFICATION_ID)
+        nm.notify(1001, notification)
+    }
+
     private fun cancelNotification(context: Context) {
         val nm = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         nm.cancel(NOTIFICATION_ID)
@@ -186,12 +227,12 @@ class UpdateDownloadBottomSheetViewModelImpl : UpdateDownloadBottomSheetViewMode
                         }
                     }
 
-                    cancelNotification(context)
                     val outputUri = FileProvider.getUriForFile(
                         context,
                         BuildConfig.APPLICATION_ID + ".provider",
                         outputFile
                     )
+                    showCompletedNotification(context, outputUri)
                     _downloadState.emit(State.Done(outputUri))
 
                 } catch (e: Exception) {

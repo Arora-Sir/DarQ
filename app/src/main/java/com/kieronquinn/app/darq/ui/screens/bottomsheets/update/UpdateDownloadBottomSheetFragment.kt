@@ -43,19 +43,33 @@ class UpdateDownloadBottomSheetFragment: BaseBottomSheetFragment<FragmentBottomS
         binding.fragmentUpdateDownloadProgress.applyMonet()
         val accentColor = monet.getAccentColor(requireContext())
         binding.fragmentUpdateDownloadCancel.setTextColor(accentColor)
+        binding.fragmentUpdateDownloadInstall.setTextColor(accentColor)
         viewLifecycleOwner.lifecycleScope.launch {
-            updateViewModel.downloadState.collect {
-                when(it){
+            updateViewModel.downloadState.collect { state ->
+                when(state){
                     is UpdateDownloadBottomSheetViewModel.State.Downloading -> {
-                        if(it.progress > 0) {
+                        if(state.progress > 0) {
                             binding.fragmentUpdateDownloadProgress.isIndeterminate = false
-                            binding.fragmentUpdateDownloadProgress.progress = it.progress
+                            binding.fragmentUpdateDownloadProgress.progress = state.progress
                         }
                     }
                     is UpdateDownloadBottomSheetViewModel.State.Done -> {
-                        updateViewModel.openPackageInstaller(requireContext(), it.fileUri)
-                        sharedViewModel.clearUpdate()
-                        dismiss()
+                        binding.fragmentUpdateDownloadTitle.text = getString(R.string.download_complete)
+                        binding.fragmentUpdateDownloadProgress.isIndeterminate = false
+                        binding.fragmentUpdateDownloadProgress.progress = 100
+
+                        binding.fragmentUpdateDownloadCancel.text = getString(R.string.close)
+                        binding.fragmentUpdateDownloadCancel.setOnClickListener {
+                            sharedViewModel.clearUpdate()
+                            dismiss()
+                        }
+
+                        binding.fragmentUpdateDownloadInstall.visibility = View.VISIBLE
+                        binding.fragmentUpdateDownloadInstall.setOnClickListener {
+                            updateViewModel.openPackageInstaller(requireContext(), state.fileUri)
+                            sharedViewModel.clearUpdate()
+                            dismiss()
+                        }
                     }
                     is UpdateDownloadBottomSheetViewModel.State.Failed -> {
                         Toast.makeText(requireContext(), R.string.bs_update_download_failed, Toast.LENGTH_LONG).show()
