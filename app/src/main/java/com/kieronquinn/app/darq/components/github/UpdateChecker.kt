@@ -44,8 +44,8 @@ class UpdateChecker {
 
     fun getLatestRelease() = callbackFlow {
         withContext(Dispatchers.IO){
-            // Pick the first non-draft release (includes pre-releases for testing)
-            val release = getReleaseList()?.firstOrNull { it.draft != true }
+            // Pick the first non-draft, non-pre-release (Latest) release
+            val release = getReleaseList()?.firstOrNull { it.draft != true && it.prerelease != true }
             release?.let { gitHubReleaseResponse ->
                 val currentTag = gitHubReleaseResponse.tagName
                 if (currentTag != null && isNewerVersion(currentTag, BuildConfig.TAG_NAME)) {
