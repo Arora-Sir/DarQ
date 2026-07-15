@@ -43,7 +43,7 @@ class UpdateDownloadBottomSheetFragment: BaseBottomSheetFragment<FragmentBottomS
         binding.fragmentUpdateDownloadProgress.applyMonet()
         val accentColor = monet.getAccentColor(requireContext())
         binding.fragmentUpdateDownloadCancel.setTextColor(accentColor)
-        lifecycleScope.launch {
+        viewLifecycleOwner.lifecycleScope.launch {
             updateViewModel.downloadState.collect {
                 when(it){
                     is UpdateDownloadBottomSheetViewModel.State.Downloading -> {
