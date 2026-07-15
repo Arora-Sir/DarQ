@@ -49,6 +49,15 @@ abstract class BaseBottomSheetDialogFragment : BaseBottomSheetFragment<FragmentB
         super.onViewCreated(view, savedInstanceState)
         binding.bottomSheetTitle.text = title
         binding.bottomSheetContent.text = content
+        val displayMetrics = requireContext().resources.displayMetrics
+        val maxHeight = (displayMetrics.heightPixels * 0.6).toInt()
+        binding.bottomSheetContentContainer.post {
+            if (binding.bottomSheetContentContainer.measuredHeight > maxHeight) {
+                binding.bottomSheetContentContainer.layoutParams = binding.bottomSheetContentContainer.layoutParams.apply {
+                    height = maxHeight
+                }
+            }
+        }
         if(positiveText != null){
             binding.bottomSheetPositive.isVisible = true
             binding.bottomSheetPositive.text = positiveText

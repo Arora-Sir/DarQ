@@ -15,7 +15,7 @@ class UpdateAvailableBottomSheetFragment: BaseBottomSheetDialogFragment() {
 
     private val sharedViewModel by navGraphViewModel<ContainerSharedViewModel>(R.id.nav_graph_main)
 
-    override val cancelable = false
+    override val cancelable = true
 
     private val update by lazy {
         sharedViewModel.getAvailableUpdate()
