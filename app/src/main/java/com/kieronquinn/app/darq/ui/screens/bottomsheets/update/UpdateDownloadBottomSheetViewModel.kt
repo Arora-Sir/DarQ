@@ -187,7 +187,10 @@ class UpdateDownloadBottomSheetViewModelImpl : UpdateDownloadBottomSheetViewMode
                         outputFile.delete()
                     }
 
-                    val request = Request.Builder().url(url).build()
+                    val request = Request.Builder()
+                        .url(url)
+                        .header("User-Agent", "Mozilla/5.0 (Linux; Android 13; SM-S901B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Mobile Safari/537.36")
+                        .build()
                     val response = okHttpClient.newCall(request).execute()
 
                     if (!response.isSuccessful) {

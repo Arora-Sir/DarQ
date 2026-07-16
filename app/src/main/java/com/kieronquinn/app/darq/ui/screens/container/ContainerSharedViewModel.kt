@@ -55,8 +55,10 @@ abstract class ContainerSharedViewModel: ViewModel() {
     abstract val switchWarning: Flow<Int?>
 
     abstract val update: Flow<UpdateChecker.Update?>
+    abstract var activeUpdate: UpdateChecker.Update?
     abstract fun getAvailableUpdate(): UpdateChecker.Update?
     abstract fun clearUpdate()
+    abstract fun clearUpdateTrigger()
     abstract fun setAvailableUpdate(update: UpdateChecker.Update?)
 
     enum class DarkModeState(val value: Int) {
@@ -72,6 +74,8 @@ class ContainerSharedViewModelImpl(context: Context, private val serviceProvider
         private const val SERVICE_START_DEBOUNCE = 500L
     }
 
+    override var activeUpdate: UpdateChecker.Update? = null
+
     private val _update = MutableStateFlow<UpdateChecker.Update?>(null).apply {
         viewModelScope.launch {
             if (settings.checkForUpdates) {
@@ -83,6 +87,7 @@ class ContainerSharedViewModelImpl(context: Context, private val serviceProvider
                             updateChecker.deleteStaleCache(context, update.assetName)
                         }
                     }
+                    activeUpdate = update
                     emit(update)
                 }
             }
@@ -92,16 +97,24 @@ class ContainerSharedViewModelImpl(context: Context, private val serviceProvider
     override val update = _update.asStateFlow()
 
     override fun getAvailableUpdate(): UpdateChecker.Update? {
-        return _update.value
+        return activeUpdate
     }
 
     override fun clearUpdate() {
         viewModelScope.launch {
             _update.emit(null)
         }
+        activeUpdate = null
+    }
+
+    override fun clearUpdateTrigger() {
+        viewModelScope.launch {
+            _update.emit(null)
+        }
     }
 
     override fun setAvailableUpdate(update: UpdateChecker.Update?) {
+        activeUpdate = update
         viewModelScope.launch {
             _update.emit(update)
         }

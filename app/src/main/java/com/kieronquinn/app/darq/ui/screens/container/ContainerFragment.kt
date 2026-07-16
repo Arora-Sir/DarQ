@@ -330,6 +330,7 @@ class ContainerFragment: BoundFragment<FragmentContainerBinding>(FragmentContain
         lifecycleScope.launchWhenResumed {
             sharedViewModel.update.collect {
                 if(it != null){
+                    sharedViewModel.clearUpdateTrigger()
                     navigation.navigate(R.id.action_global_updateAvailableBottomSheetFragment)
                 }
             }
