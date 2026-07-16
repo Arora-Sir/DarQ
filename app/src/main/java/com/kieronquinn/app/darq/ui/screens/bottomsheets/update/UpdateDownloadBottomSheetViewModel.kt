@@ -155,21 +155,21 @@ class UpdateDownloadBottomSheetViewModelImpl : UpdateDownloadBottomSheetViewMode
     // ── Download logic ────────────────────────────────────────────────────
 
     override fun startDownload(context: Context, update: UpdateChecker.Update) {
-        if (_downloadState.value is State.Idle) {
-            val downloadFolder = File(context.cacheDir, "updates")
-            val existingFile = File(downloadFolder, update.assetName)
-            if (existingFile.exists() && existingFile.length() > 0) {
-                viewModelScope.launch {
-                    val outputUri = FileProvider.getUriForFile(
-                        context,
-                        BuildConfig.APPLICATION_ID + ".provider",
-                        existingFile
-                    )
-                    _downloadState.emit(State.Done(outputUri))
-                }
-            } else {
-                downloadUpdate(context, update.assetUrl, update.assetName)
+        _downloadState.value = State.Idle
+        val downloadFolder = File(context.cacheDir, "updates")
+        val existingFile = File(downloadFolder, update.assetName)
+        if (existingFile.exists() && existingFile.length() > 0) {
+            viewModelScope.launch {
+                val outputUri = FileProvider.getUriForFile(
+                    context,
+                    BuildConfig.APPLICATION_ID + ".provider",
+                    existingFile
+                )
+                showCompletedNotification(context, outputUri)
+                _downloadState.emit(State.Done(outputUri))
             }
+        } else {
+            downloadUpdate(context, update.assetUrl, update.assetName)
         }
     }
 
