@@ -48,6 +48,14 @@ To fix this:
 2. Enable **"Keep service running in background"**. This starts a low-priority foreground service with a persistent notification to protect the process from being terminated.
 3. If you want a clean status bar without a permanent notification icon, click **"Manage Notification"** to open system settings and hide/disable the persistent notification channel.
 
+### Why does DarQ show a "Shizuku not running" notification on device boot, even though Shizuku starts up shortly after?
+
+By default, Android launches all startup apps simultaneously when the device finishes booting. Since Shizuku has to initialize its native background daemon, it often takes several seconds to a minute to start. DarQ used to immediately fail if Shizuku wasn't ready.
+
+To resolve this, we added a **"Wait for Shizuku on boot"** setting in Advanced Options (enabled by default). When active, DarQ will wait up to 3 minutes for Shizuku to start up before showing any warnings, ensuring a silent and successful connection in the background.
+
+Additionally, DarQ now automatically detects and reconnects to Shizuku whenever Shizuku starts or restarts in the background, so you no longer need to open the DarQ app manually to trigger it.
+
 ## Force Dark Behavior & Troubleshooting
 
 ### Why does DarQ/force dark need the system dark theme to be enabled?
