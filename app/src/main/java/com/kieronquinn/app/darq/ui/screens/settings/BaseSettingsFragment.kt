@@ -25,6 +25,9 @@ abstract class BaseSettingsFragment<T: ViewBinding>(inflate: (LayoutInflater, Vi
     internal abstract val settingsItems: MutableList<SettingsItem>
     internal val settings by inject<DarqSharedPreferences>()
 
+    private var layoutManagerState: android.os.Parcelable? = null
+    private var savedRecyclerView: RecyclerView? = null
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         exitTransition = TransitionUtils.getMaterialSharedAxis(requireContext(), true)
@@ -33,9 +36,20 @@ abstract class BaseSettingsFragment<T: ViewBinding>(inflate: (LayoutInflater, Vi
         reenterTransition = TransitionUtils.getMaterialSharedAxis(requireContext(), false)
     }
 
+    override fun onDestroyView() {
+        layoutManagerState = savedRecyclerView?.layoutManager?.onSaveInstanceState()
+        savedRecyclerView = null
+        super.onDestroyView()
+    }
+
     internal fun setupRecyclerView(recyclerView: RecyclerView, settingsAdapter: SettingsAdapter) {
+        savedRecyclerView = recyclerView
         recyclerView.run {
-            layoutManager = LinearLayoutManager(context)
+            layoutManager = LinearLayoutManager(context).apply {
+                if (layoutManagerState != null) {
+                    onRestoreInstanceState(layoutManagerState)
+                }
+            }
             adapter = settingsAdapter
         }
         ViewCompat.setOnApplyWindowInsetsListener(recyclerView){ view, insets ->

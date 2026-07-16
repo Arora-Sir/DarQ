@@ -78,7 +78,15 @@ class BootForegroundService : LifecycleService() {
                 .setTicker(getText(R.string.boot_foreground_service_notification_content))
                 .build()
 
-        startForeground(NOTIFICATION_ID_STARTUP, notification)
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+            startForeground(
+                NOTIFICATION_ID_STARTUP,
+                notification,
+                android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_SPECIAL_USE
+            )
+        } else {
+            startForeground(NOTIFICATION_ID_STARTUP, notification)
+        }
 
         lifecycleScope.launchWhenCreated {
             if (!Shell.rootAccess() && isShizukuInstalled() && settings.bootWaitShizuku) {

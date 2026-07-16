@@ -13,6 +13,10 @@
 - [修改版 Shizuku (GitHub)](https://github.com/thedjchi/Shizuku)
 - [修改版 Shizuku 版本发布](https://github.com/thedjchi/Shizuku/releases)
 
+### 谁最初创建了 DarQ？
+
+DarQ 最初由 [Kieron Quinn](https://github.com/KieronQuinn) ([DarQ](https://github.com/KieronQuinn/DarQ)) 创建。现在由 [Mohit Arora](https://github.com/Arora-Sir) ([DarQ Reborn](https://github.com/Arora-Sir/DarQ-Reborn)) 进行维护、更新和扩展。
+
 ### 为什么从官方的 v2.2.1 版本升级会提示“安装包似乎无效”？
 
 由于这是一个由社区维护的分支，APK 签名使用的是与原版不同的开发人员私有证书。出于安全原因，Android 会阻止签名不匹配的升级。
@@ -77,6 +81,14 @@ DarQ 使用了一个只能用特权指令才能调用的隐藏的 API（`IActivi
 ### 强制深色在没有 Xposed 的时候能用到所有软件上吗？
 
 不能。软件能在代码里禁用强制深色，所以 Xposed 是绕过的唯一方式。
+
+### 我该如何配置 DarQ 的 LSPosed / Xposed 作用域？
+
+要让 Xposed 模块正常工作，您必须同时配置 LSPosed 和 DarQ：
+
+1. **LSPosed 管理器**：在 LSPosed 管理器的 **DarQ 模块作用域** 中勾选/启用目标应用程序。这允许模块注入并挂钩到这些应用中。
+2. **DarQ 应用**：在 DarQ 的应用选择器中勾选相同的应用程序（除非您在高级选项中启用了 **“始终使用强制深色”**，这会自动为作用域内的所有应用启用深色）。
+3. **系统框架（System Framework）**：**不要**在 LSPosed 作用域中勾选“系统框架”。DarQ 只需要挂钩单个应用程序进程来启用强制深色，挂钩系统框架是没有必要的，且可能会带来系统 UI 的额外开销。
 
 ### 为什么状态栏在开启强制深色时反色了（黑图标）？能修下吗？
 

@@ -1,0 +1,30 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+  <!-- Vertical line -->
+  <path
+      android:strokeColor="?android:attr/textColorPrimary"
+      android:strokeWidth="2"
+      android:strokeLineCap="round"
+      android:pathData="M6,6L6,18" />
+  <!-- Curved branch -->
+  <path
+      android:strokeColor="?android:attr/textColorPrimary"
+      android:strokeWidth="2"
+      android:strokeLineCap="round"
+      android:pathData="M6,12c6,0 12,-1 12,-6" />
+  <!-- Top Left Circle -->
+  <path
+      android:fillColor="?android:attr/textColorPrimary"
+      android:pathData="M6,6m-2,0a2,2 0,1 1,4 0a2,2 0,1 1,-4 0" />
+  <!-- Bottom Left Circle -->
+  <path
+      android:fillColor="?android:attr/textColorPrimary"
+      android:pathData="M6,18m-2,0a2,2 0,1 1,4 0a2,2 0,1 1,-4 0" />
+  <!-- Top Right Circle -->
+  <path
+      android:fillColor="?android:attr/textColorPrimary"
+      android:pathData="M18,6m-2,0a2,2 0,1 1,4 0a2,2 0,1 1,-4 0" />
+</vector>

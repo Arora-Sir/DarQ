@@ -54,37 +54,6 @@
             android:orientation="horizontal">
 
             <com.google.android.material.chip.Chip
-                android:id="@+id/chip_github"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginEnd="@dimen/padding_16"
-                android:text="@string/chip_github"
-                android:textAppearance="@style/TextAppearance.AppCompat.Small.Darq.Medium"
-                app:chipBackgroundColor="@color/icon_circle_6"
-                app:chipIcon="@drawable/ic_github"
-                app:chipIconTint="@color/icon_inside_6"
-                app:chipStartPadding="8dp" />
-
-            <com.google.android.material.chip.Chip
-                android:id="@+id/chip_twitter"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/chip_twitter"
-                android:textAppearance="@style/TextAppearance.AppCompat.Small.Darq.Medium"
-                app:chipBackgroundColor="@color/icon_circle_8"
-                app:chipIcon="@drawable/ic_twitter"
-                app:chipIconTint="@color/icon_inside_8"
-                app:chipStartPadding="8dp" />
-
-        </LinearLayout>
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:visibility="gone"
-            android:orientation="horizontal">
-
-            <com.google.android.material.chip.Chip
                 android:id="@+id/chip_donate"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -97,14 +66,14 @@
                 app:chipStartPadding="8dp" />
 
             <com.google.android.material.chip.Chip
-                android:id="@+id/chip_xda"
+                android:id="@+id/chip_socials"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/chip_xda"
+                android:text="@string/chip_socials"
                 android:textAppearance="@style/TextAppearance.AppCompat.Small.Darq.Medium"
-                app:chipBackgroundColor="@color/icon_circle_5"
-                app:chipIcon="@drawable/ic_xda"
-                app:chipIconTint="@color/icon_inside_5"
+                app:chipBackgroundColor="@color/icon_circle_6"
+                app:chipIcon="@drawable/ic_socials"
+                app:chipIconTint="@color/icon_inside_6"
                 app:chipStartPadding="8dp" />
 
         </LinearLayout>

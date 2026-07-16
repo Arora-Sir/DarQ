@@ -33,6 +33,45 @@ class Xposed : IXposedHookLoadPackage {
         if(lpparam.packageName == BuildConfig.APPLICATION_ID){
             setupSelfHooks(lpparam.classLoader)
         }
+        XposedHelpers.findAndHookMethod("android.os.SystemProperties", null, "getBoolean", String::class.java, Boolean::class.java, object: XC_MethodHook(){
+            override fun beforeHookedMethod(param: MethodHookParam) {
+                val key = param.args[0] as? String
+                if(key == "debug.hwui.force_dark") {
+                    if(xposedSettings == null) {
+                        xposedSettings = getXposedSettings(context)
+                    }
+                    if(xposedSettings?.enabled == true) {
+                        param.result = isDarkMode
+                    }
+                }
+            }
+        })
+        XposedHelpers.findAndHookMethod("android.os.SystemProperties", null, "get", String::class.java, object: XC_MethodHook(){
+            override fun beforeHookedMethod(param: MethodHookParam) {
+                val key = param.args[0] as? String
+                if(key == "debug.hwui.force_dark") {
+                    if(xposedSettings == null) {
+                        xposedSettings = getXposedSettings(context)
+                    }
+                    if(xposedSettings?.enabled == true) {
+                        param.result = if(isDarkMode) "true" else "false"
+                    }
+                }
+            }
+        })
+        XposedHelpers.findAndHookMethod("android.os.SystemProperties", null, "get", String::class.java, String::class.java, object: XC_MethodHook(){
+            override fun beforeHookedMethod(param: MethodHookParam) {
+                val key = param.args[0] as? String
+                if(key == "debug.hwui.force_dark") {
+                    if(xposedSettings == null) {
+                        xposedSettings = getXposedSettings(context)
+                    }
+                    if(xposedSettings?.enabled == true) {
+                        param.result = if(isDarkMode) "true" else "false"
+                    }
+                }
+            }
+        })
         XposedHelpers.findAndHookMethod(View::class.java, "setForceDarkAllowed", Boolean::class.java, object : XC_MethodHook() {
             override fun beforeHookedMethod(param: MethodHookParam) {
                 super.beforeHookedMethod(param)

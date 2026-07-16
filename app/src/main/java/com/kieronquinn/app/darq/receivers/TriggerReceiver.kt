@@ -20,10 +20,14 @@ class TriggerReceiver: BroadcastReceiver() {
         if (context == null || intent?.action != ACTION_START_SERVICE) return
         Log.d(TAG, "Received trigger broadcast to start service")
         val settings = GlobalContext.get().get<DarqSharedPreferences>()
-        if (settings.persistentService) {
-            context.startForegroundService(Intent(context, DarqPersistentService::class.java))
-        } else {
-            context.startForegroundService(Intent(context, BootForegroundService::class.java))
+        try {
+            if (settings.persistentService) {
+                context.startForegroundService(Intent(context, DarqPersistentService::class.java))
+            } else {
+                context.startForegroundService(Intent(context, BootForegroundService::class.java))
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to start service from trigger broadcast", e)
         }
     }
 }

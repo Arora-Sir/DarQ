@@ -28,7 +28,10 @@ class UpdateAvailableBottomSheetFragment: BaseBottomSheetDialogFragment() {
     }
 
     override val content by lazy {
-        update?.changelog ?: ""
+        val currentVer = com.kieronquinn.app.darq.BuildConfig.VERSION_NAME
+        val newVer = update?.version ?: ""
+        val versionInfo = "**Current Version:** $currentVer\n**New Version:** $newVer\n\n"
+        versionInfo + (update?.changelog ?: "")
     }
 
     override val positiveText by lazy {

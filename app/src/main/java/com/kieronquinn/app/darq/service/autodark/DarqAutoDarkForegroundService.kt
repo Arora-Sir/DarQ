@@ -73,7 +73,15 @@ class DarqAutoDarkForegroundService: LifecycleService() {
                 .setTicker(getText(notificationContent))
                 .build()
 
-        startForeground(NOTIFICATION_ID_AUTO_DARK, notification)
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+            startForeground(
+                NOTIFICATION_ID_AUTO_DARK,
+                notification,
+                android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_SPECIAL_USE
+            )
+        } else {
+            startForeground(NOTIFICATION_ID_AUTO_DARK, notification)
+        }
 
         lifecycleScope.launchWhenCreated {
             if(!justReschedule) {

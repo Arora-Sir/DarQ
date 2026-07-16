@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    tools:layout_gravity="bottom">
+
+    <TextView
+        android:id="@+id/donation_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/padding_16"
+        android:paddingTop="@dimen/padding_8"
+        android:paddingBottom="@dimen/padding_8"
+        android:text="@string/donation_dialog_title"
+        android:textAppearance="@style/TextAppearance.AppCompat.Large.Darq"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <LinearLayout
+        android:id="@+id/donation_upi"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/padding_16"
+        android:layout_marginTop="@dimen/padding_16"
+        android:layout_marginEnd="@dimen/padding_16"
+        android:background="@drawable/button_background_backup_restore"
+        android:foreground="@drawable/rounded_ripple_36"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:padding="@dimen/padding_16"
+        android:clickable="true"
+        android:focusable="true"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/donation_title">
+
+        <ImageView
+            android:id="@+id/donation_ic_upi"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_marginEnd="16dp"
+            android:src="@drawable/ic_bank_payment" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/donation_dialog_upi_title"
+                android:textAppearance="@style/TextAppearance.AppCompat.Medium.Darq"
+                android:textColor="?android:textColorPrimary"
+                android:textStyle="bold" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/donation_dialog_upi_summary"
+                android:textAppearance="@style/TextAppearance.AppCompat.Small.Darq"
+                android:textColor="?android:textColorSecondary" />
+        </LinearLayout>
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/donation_paypal"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/padding_16"
+        android:layout_marginTop="@dimen/padding_8"
+        android:layout_marginEnd="@dimen/padding_16"
+        android:background="@drawable/button_background_backup_restore"
+        android:foreground="@drawable/rounded_ripple_36"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:padding="@dimen/padding_16"
+        android:clickable="true"
+        android:focusable="true"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/donation_upi">
+
+        <ImageView
+            android:id="@+id/donation_ic_paypal"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_marginEnd="16dp"
+            android:src="@drawable/ic_donate" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/donation_dialog_global_title"
+                android:textAppearance="@style/TextAppearance.AppCompat.Medium.Darq"
+                android:textColor="?android:textColorPrimary"
+                android:textStyle="bold" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/donation_dialog_global_summary"
+                android:textAppearance="@style/TextAppearance.AppCompat.Small.Darq"
+                android:textColor="?android:textColorSecondary" />
+        </LinearLayout>
+
+    </LinearLayout>
+
+    <androidx.appcompat.widget.AppCompatButton
+        android:id="@+id/donation_cancel"
+        style="@style/Widget.AppCompat.Button.Borderless.Colored"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/padding_8"
+        android:layout_marginEnd="@dimen/padding_16"
+        android:fontFamily="@font/google_sans_text_medium"
+        android:text="@android:string/cancel"
+        android:textAllCaps="false"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/donation_paypal" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

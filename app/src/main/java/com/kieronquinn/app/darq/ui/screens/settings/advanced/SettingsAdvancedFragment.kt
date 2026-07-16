@@ -22,28 +22,13 @@ class SettingsAdvancedFragment : BaseSettingsFragment<FragmentSettingsAdvancedBi
     override val settingsItems: MutableList<SettingsItem> by lazy {
         listOf<SettingsItem>(
             SettingsItem.Header(
-                getString(R.string.item_advanced_group_theme_title)
+                getString(R.string.item_advanced_group_service_title)
             ),
             SettingsItem.SwitchSetting(
-                R.drawable.ic_advanced_always_use_force_dark,
-                getString(R.string.item_always_use_force_dark_title),
-                getString(R.string.item_always_use_force_dark_content),
-                settings::alwaysForceDark
-            ),
-            SettingsItem.SwitchSetting(
-                R.drawable.ic_github,
-                getString(R.string.item_check_for_updates_title),
-                getString(R.string.item_check_for_updates_content),
-                settings::checkForUpdates
-            ),
-            SettingsItem.Header(
-                getString(R.string.item_advanced_group_background_title)
-            ),
-            SettingsItem.SwitchSetting(
-                R.drawable.ic_advanced_send_app_closes,
-                getString(R.string.item_send_app_closes_title),
-                getString(R.string.item_send_app_closes_content),
-                settings::sendAppCloses
+                R.drawable.ic_boot_wait,
+                getString(R.string.item_boot_wait_shizuku_title),
+                getString(R.string.item_boot_wait_shizuku_content),
+                settings::bootWaitShizuku
             ),
             SettingsItem.SwitchSetting(
                 R.drawable.ic_notification,
@@ -52,22 +37,20 @@ class SettingsAdvancedFragment : BaseSettingsFragment<FragmentSettingsAdvancedBi
                 settings::persistentService,
                 tapAction = { isChecked ->
                     val intent = Intent(requireContext(), DarqPersistentService::class.java)
-                    if (isChecked) {
-                        requireContext().startForegroundService(intent)
-                    } else {
-                        requireContext().stopService(intent)
+                    try {
+                        if (isChecked) {
+                            requireContext().startForegroundService(intent)
+                        } else {
+                            requireContext().stopService(intent)
+                        }
+                    } catch (e: Exception) {
+                        android.util.Log.e("SettingsAdvanced", "Failed to start/stop persistent service", e)
                     }
                     binding.recyclerView.post {
                         adapter.notifyDataSetChanged()
                     }
                     true
                 }
-            ),
-            SettingsItem.SwitchSetting(
-                R.drawable.ic_notification,
-                getString(R.string.item_boot_wait_shizuku_title),
-                getString(R.string.item_boot_wait_shizuku_content),
-                settings::bootWaitShizuku
             ),
             SettingsItem.Setting(
                 R.drawable.ic_developer_options_service_info,
@@ -81,6 +64,46 @@ class SettingsAdvancedFragment : BaseSettingsFragment<FragmentSettingsAdvancedBi
                     }
                     requireContext().startActivity(intent)
                 }
+            ),
+            SettingsItem.Header(
+                getString(R.string.item_advanced_group_updates_title)
+            ),
+            SettingsItem.SwitchSetting(
+                R.drawable.ic_github,
+                getString(R.string.item_check_for_updates_title),
+                getString(R.string.item_check_for_updates_content),
+                settings::checkForUpdates,
+                tapAction = { isChecked ->
+                    binding.recyclerView.post {
+                        adapter.notifyDataSetChanged()
+                    }
+                    true
+                }
+            ),
+            SettingsItem.SwitchSetting(
+                R.drawable.ic_release_branch,
+                getString(R.string.item_check_for_prereleases_title),
+                getString(R.string.item_check_for_prereleases_content),
+                settings::checkForPrereleases,
+                visible = { settings.checkForUpdates }
+            ),
+            SettingsItem.Header(
+                getString(R.string.item_advanced_group_theme_title)
+            ),
+            SettingsItem.SwitchSetting(
+                R.drawable.ic_advanced_always_use_force_dark,
+                getString(R.string.item_always_use_force_dark_title),
+                getString(R.string.item_always_use_force_dark_content),
+                settings::alwaysForceDark
+            ),
+            SettingsItem.Header(
+                getString(R.string.item_advanced_group_behaviour_title)
+            ),
+            SettingsItem.SwitchSetting(
+                R.drawable.ic_advanced_send_app_closes,
+                getString(R.string.item_send_app_closes_title),
+                getString(R.string.item_send_app_closes_content),
+                settings::sendAppCloses
             )
         ).toMutableList()
     }

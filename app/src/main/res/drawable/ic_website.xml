@@ -1,0 +1,27 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="100"
+    android:viewportHeight="100">
+    <!-- Left bracket < -->
+    <path
+        android:strokeWidth="8"
+        android:strokeColor="#FFFFFF"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round"
+        android:pathData="M 25,35 L 10,50 L 25,65" />
+    <!-- Right bracket > -->
+    <path
+        android:strokeWidth="8"
+        android:strokeColor="#FFFFFF"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round"
+        android:pathData="M 75,35 L 90,50 L 75,65" />
+    <!-- Letter M -->
+    <path
+        android:strokeWidth="6"
+        android:strokeColor="#FFFFFF"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round"
+        android:pathData="M 38,65 L 38,35 L 50,50 L 62,35 L 62,65" />
+</vector>

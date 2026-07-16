@@ -22,8 +22,8 @@
     <string name="item_check_for_updates_content">打开应用时自动检查新版本，并提示直接安装。</string>
     <string name="item_header_about">关于</string>
     <string name="item_about_faq_title">常见问题</string>
-    <string name="item_about_title">DarQ v%1s</string>
-    <string name="item_about_content">原作者：Kieron Quinn / Quinny899\n维护与更新：Mohit Arora / Arora-Sir</string>
+    <string name="item_about_title">DarQ Reborn v%1s</string>
+    <string name="item_about_content">开发与维护：&lt;a href="https://github.com/Arora-Sir">&lt;b>&lt;u>Mohit Arora / Arora-Sir&lt;/u>&lt;/b>&lt;/a&gt;。 <br/><br/>项目源码已在 &lt;a href="https://github.com/Arora-Sir/DarQ-Reborn">&lt;b>&lt;u>GitHub&lt;/u>&lt;/b>&lt;/a&gt; 开源。</string>
     <string name="item_developer_options_title">开发者选项</string>
     <string name="item_developer_options_monet_color_picker_title">动态颜色选择器</string>
     <string name="item_developer_options_monet_color_picker_content">从壁纸中选取一种颜色</string>
@@ -97,7 +97,7 @@
     <string name="dialog_location_permission_text">允许 <b>DarQ</b> 使用您的定位来获取日出日落时间吗？</string>
     <string name="dialog_location_permission_use_location">使用定位</string>
     <string name="dialog_location_permission_use_timezone">使用时区 \n<small>（精准度低）</small></string>
-    <string name="chip_donate">捐赠</string>
+    <string name="chip_donate">请我喝杯咖啡</string>
     <string name="chip_twitter">在 Twitter 上关注作者</string>
     <string name="chip_github">GitHub</string>
     <string name="chip_xda">XDA 上的帖子</string>
@@ -108,4 +108,15 @@
     <string name="bottom_sheet_update_available_neutral">在 GitHub 上查看</string>
     <string name="download_manager_description">正在下载更新…</string>
     <string name="bs_update_download_failed">下载失败</string>
+    <string name="item_check_for_prereleases_title">检查预发布版本</string>
+    <string name="item_check_for_prereleases_content">在检查更新时，包含测试版（Beta）和预发布版本。</string>
+    <string name="item_advanced_group_service_title">服务与集成</string>
+    <string name="item_advanced_group_updates_title">更新</string>
+    <string name="item_advanced_group_theme_title">主题选项</string>
+    <string name="item_advanced_group_behaviour_title">应用行为</string>
+    <string name="donation_dialog_title">请我喝杯咖啡</string>
+    <string name="donation_dialog_upi_title">使用 UPI 支付</string>
+    <string name="donation_dialog_upi_summary">使用 Google Pay, PhonePe, Paytm, BHIM 等支付（印度）</string>
+    <string name="donation_dialog_global_title">PayPal / Ko-fi</string>
+    <string name="donation_dialog_global_summary">使用全球借记卡/信用卡或 PayPal 支付</string>
 </resources>

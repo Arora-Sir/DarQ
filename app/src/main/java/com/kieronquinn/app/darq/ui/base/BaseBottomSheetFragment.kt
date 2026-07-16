@@ -31,9 +31,16 @@ abstract class BaseBottomSheetFragment<T: ViewBinding>(private val inflate: (Lay
 
     private val blurProvider by inject<BlurProvider>()
     private var isBlurShowing = false
+    private var showBlurAnimation: ValueAnimator? = null
     private val bottomSheetCallback = object: BottomSheetBehavior.BottomSheetCallback() {
 
-        override fun onStateChanged(bottomSheet: View, newState: Int) {}
+        override fun onStateChanged(bottomSheet: View, newState: Int) {
+            if (newState == BottomSheetBehavior.STATE_HIDDEN) {
+                applyBlur(0f)
+            } else if (newState == BottomSheetBehavior.STATE_EXPANDED) {
+                applyBlur(1f)
+            }
+        }
 
         override fun onSlide(bottomSheet: View, slideOffset: Float) {
             showBlurAnimation?.cancel()
@@ -52,6 +59,8 @@ abstract class BaseBottomSheetFragment<T: ViewBinding>(private val inflate: (Lay
 
                 window?.let {
                     WindowCompat.setDecorFitsSystemWindows(it, false)
+                    it.clearFlags(android.view.WindowManager.LayoutParams.FLAG_DIM_BEHIND)
+                    it.setBackgroundDrawable(android.graphics.drawable.ColorDrawable(Color.TRANSPARENT))
                 }
 
                 findViewById<View>(com.google.android.material.R.id.container)?.apply {
@@ -70,6 +79,8 @@ abstract class BaseBottomSheetFragment<T: ViewBinding>(private val inflate: (Lay
         }
         dialog.window?.let {
             WindowCompat.setDecorFitsSystemWindows(it, false)
+            it.clearFlags(android.view.WindowManager.LayoutParams.FLAG_DIM_BEHIND)
+            it.setBackgroundDrawable(android.graphics.drawable.ColorDrawable(Color.TRANSPARENT))
             it.navigationBarColor = Color.TRANSPARENT
             ViewCompat.setOnApplyWindowInsetsListener(it.decorView) { view, insets ->
                 val navigationInsets = insets.getInsets(WindowInsetsCompat.Type.navigationBars())
@@ -105,7 +116,6 @@ abstract class BaseBottomSheetFragment<T: ViewBinding>(private val inflate: (Lay
         return binding.root
     }
 
-    private var showBlurAnimation: ValueAnimator? = null
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         dialog?.setOnShowListener {
@@ -115,6 +125,7 @@ abstract class BaseBottomSheetFragment<T: ViewBinding>(private val inflate: (Lay
                 behavior = (dialog as? BottomSheetDialog)?.behavior?.apply {
                     isDraggable = cancelable
                     state = BottomSheetBehavior.STATE_EXPANDED
+                    skipCollapsed = true
                     addBottomSheetCallback(bottomSheetCallback)
                 }
             }
@@ -134,9 +145,14 @@ abstract class BaseBottomSheetFragment<T: ViewBinding>(private val inflate: (Lay
     private fun applyBlur(ratio: Float){
         val dialogWindow = dialog?.window ?: return
         val appWindow = activity?.window ?: return
-        dialogWindow.decorView.post {
-            blurProvider.applyDialogBlur(dialogWindow, appWindow, ratio)
+        if (ratio > 0f) {
+            dialogWindow.decorView.post {
+                blurProvider.applyDialogBlur(dialogWindow, appWindow, ratio)
+            }
+        } else {
+            blurProvider.applyDialogBlur(dialogWindow, appWindow, 0f)
         }
+        isBlurShowing = ratio > 0f
     }
 
     override fun onResume() {

@@ -32,6 +32,9 @@ abstract class DarqSharedPreferences: BaseSharedPreferences() {
         private const val KEY_CHECK_FOR_UPDATES = "check_for_updates"
         private const val DEFAULT_CHECK_FOR_UPDATES = true
 
+        private const val KEY_CHECK_FOR_PRERELEASES = "check_for_prereleases"
+        private const val DEFAULT_CHECK_FOR_PRERELEASES = false
+
         private const val KEY_DEVELOPER_OPTIONS = "developer_options"
         private const val DEFAULT_DEVELOPER_OPTIONS = false
 
@@ -62,6 +65,7 @@ abstract class DarqSharedPreferences: BaseSharedPreferences() {
     var alwaysForceDark by this.shared(KEY_ALWAYS_FORCE_DARK, DEFAULT_ALWAYS_FORCE_DARK)
     var useLocation by this.shared(KEY_USE_LOCATION, DEFAULT_USE_LOCATION)
     var checkForUpdates by this.shared(KEY_CHECK_FOR_UPDATES, DEFAULT_CHECK_FOR_UPDATES)
+    var checkForPrereleases by this.shared(KEY_CHECK_FOR_PRERELEASES, DEFAULT_CHECK_FOR_PRERELEASES)
     var developerOptions by this.shared(KEY_DEVELOPER_OPTIONS, DEFAULT_DEVELOPER_OPTIONS)
     var persistentService by this.shared(KEY_PERSISTENT_SERVICE, DEFAULT_PERSISTENT_SERVICE)
     var bootWaitShizuku by this.shared(KEY_BOOT_WAIT_SHIZUKU, DEFAULT_BOOT_WAIT_SHIZUKU)
@@ -98,6 +102,7 @@ abstract class DarqSharedPreferences: BaseSharedPreferences() {
             xposedAggressiveDark = this.xposedAggressiveDark,
             xposedInvertStatus = this.xposedInvertStatus,
             checkForUpdates = this.checkForUpdates,
+            checkForPrereleases = this.checkForPrereleases,
             persistentService = this.persistentService,
             bootWaitShizuku = this.bootWaitShizuku,
             enabledApps = this.enabledApps.toList()
@@ -120,6 +125,7 @@ abstract class DarqSharedPreferences: BaseSharedPreferences() {
         xposedAggressiveDark = settingsBackup.xposedAggressiveDark
         xposedInvertStatus = settingsBackup.xposedInvertStatus
         checkForUpdates = settingsBackup.checkForUpdates
+        checkForPrereleases = settingsBackup.checkForPrereleases
         persistentService = settingsBackup.persistentService
         bootWaitShizuku = settingsBackup.bootWaitShizuku
         enabledApps = settingsBackup.enabledApps.toTypedArray()

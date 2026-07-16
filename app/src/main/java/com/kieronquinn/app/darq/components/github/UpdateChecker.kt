@@ -12,10 +12,11 @@ import kotlinx.coroutines.withContext
 import retrofit2.Call
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
+import com.kieronquinn.app.darq.components.settings.DarqSharedPreferences
 import retrofit2.http.GET
 import java.io.File
 
-class UpdateChecker {
+class UpdateChecker(private val settings: DarqSharedPreferences) {
 
     private val retrofit by lazy {
         Retrofit.Builder()
@@ -31,32 +32,52 @@ class UpdateChecker {
     }
 
     private fun isNewerVersion(remoteTag: String, localTag: String): Boolean {
-        val remote = remoteTag.replace("v", "").split(".").mapNotNull { it.toIntOrNull() }
-        val local = localTag.replace("v", "").split(".").mapNotNull { it.toIntOrNull() }
-        val length = maxOf(remote.size, local.size)
-        for (i in 0 until length) {
-            val r = remote.getOrElse(i) { 0 }
-            val l = local.getOrElse(i) { 0 }
+        fun parseVersion(tag: String): Pair<List<Int>, String?> {
+            val clean = tag.replace("v", "").trim()
+            val parts = clean.split("-", limit = 2)
+            val mainStr = parts[0]
+            val preRelease = if (parts.size > 1) parts[1] else null
+            
+            val mainNumbers = mainStr.split(".").mapNotNull { it.toIntOrNull() }
+            return Pair(mainNumbers, preRelease)
+        }
+
+        val (remoteNums, remotePre) = parseVersion(remoteTag)
+        val (localNums, localPre) = parseVersion(localTag)
+
+        val maxLength = maxOf(remoteNums.size, localNums.size)
+        for (i in 0 until maxLength) {
+            val r = remoteNums.getOrElse(i) { 0 }
+            val l = localNums.getOrElse(i) { 0 }
             if (r > l) return true
             if (r < l) return false
         }
+
+        // If main versions are equal, a pre-release version is older than a stable version.
+        if (remotePre != null && localPre == null) {
+            return false
+        }
+        if (remotePre == null && localPre != null) {
+            return true
+        }
+        if (remotePre != null && localPre != null) {
+            return remotePre > localPre
+        }
+
         return false
     }
 
     fun getLatestRelease() = callbackFlow {
         Log.d("DarQUpdate", "getLatestRelease: Checking for update started")
         withContext(Dispatchers.IO){
-            val release = getLatestReleaseResponse()
+            val release = getLatestReleaseResponse(settings.checkForPrereleases)
             Log.d("DarQUpdate", "getLatestRelease: Fetched release response: $release")
             release?.let { gitHubReleaseResponse ->
                 val currentTag = gitHubReleaseResponse.tagName
                 Log.d("DarQUpdate", "getLatestRelease: Current remote tag = $currentTag, Local tag = ${BuildConfig.TAG_NAME}")
                 if (currentTag != null) {
-                    val remoteNormalized = currentTag.replace("v", "").trim()
-                    val localNormalized = BuildConfig.TAG_NAME.replace("v", "").trim()
-                    Log.d("DarQUpdate", "getLatestRelease: Normalized compare: remote=$remoteNormalized, local=$localNormalized")
-                    if (remoteNormalized != localNormalized) {
-                        Log.d("DarQUpdate", "getLatestRelease: Remote tag differs from local tag, looking for apk asset")
+                    if (isNewerVersion(currentTag, BuildConfig.TAG_NAME)) {
+                        Log.d("DarQUpdate", "getLatestRelease: Remote tag is newer, looking for apk asset")
                         val assets = gitHubReleaseResponse.assets
                         Log.d("DarQUpdate", "getLatestRelease: Total assets found: ${assets?.size ?: 0}")
                         assets?.forEach {
@@ -96,12 +117,13 @@ class UpdateChecker {
                             publishedAt,
                             asset.browserDownloadUrl ?: RELEASES_URL,
                             uniqueAssetName,
-                            releaseUrl ?: RELEASES_URL
+                            releaseUrl ?: RELEASES_URL,
+                            currentTag
                         )
                         Log.d("DarQUpdate", "getLatestRelease: Emitting update: $updateObj")
                         this@callbackFlow.trySend(updateObj).isSuccess
                     } else {
-                        Log.d("DarQUpdate", "getLatestRelease: Remote tag is the same as local tag. No update needed.")
+                        Log.d("DarQUpdate", "getLatestRelease: Remote tag is not newer than local tag. No update needed.")
                         this@callbackFlow.trySend(null).isSuccess
                     }
                 } else {
@@ -129,11 +151,15 @@ class UpdateChecker {
         }
     }
 
-    private fun getLatestReleaseResponse(): GitHubReleaseResponse? {
+    private fun getLatestReleaseResponse(checkPrereleases: Boolean): GitHubReleaseResponse? {
         val service: GitHubService = retrofit.create(GitHubService::class.java)
-        Log.d("DarQUpdate", "getLatestReleaseResponse: Making GitHub API call to $BASE_URL")
+        Log.d("DarQUpdate", "getLatestReleaseResponse: Making GitHub API call to $BASE_URL with checkPrereleases=$checkPrereleases")
         runCatching {
-            service.getLatestRelease().execute().body()
+            if (checkPrereleases) {
+                service.getReleases().execute().body()?.firstOrNull { it.draft != true }
+            } else {
+                service.getLatestRelease().execute().body()
+            }
         }.onSuccess {
             Log.d("DarQUpdate", "getLatestReleaseResponse: API call success, body: $it")
             return it
@@ -147,9 +173,12 @@ class UpdateChecker {
     interface GitHubService {
         @GET("releases/latest")
         fun getLatestRelease(): Call<GitHubReleaseResponse>
+
+        @GET("releases")
+        fun getReleases(): Call<List<GitHubReleaseResponse>>
     }
 
     @Parcelize
-    data class Update(val name: String, val changelog: String, val timestamp: String, val assetUrl: String, val assetName: String, val releaseUrl: String): Parcelable
+    data class Update(val name: String, val changelog: String, val timestamp: String, val assetUrl: String, val assetName: String, val releaseUrl: String, val version: String): Parcelable
 
 }

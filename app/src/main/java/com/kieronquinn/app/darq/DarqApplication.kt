@@ -62,7 +62,7 @@ class DarqApplication : Application() {
     private val appComponentsModule = module {
         single<DarqSharedPreferences> { AppSharedPreferences(get()) }
         single<Navigation> { NavigationImpl() }
-        single { UpdateChecker() }
+        single { UpdateChecker(get()) }
     }
 
     private val viewModelsModule = module {

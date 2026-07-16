@@ -19,8 +19,10 @@
     <string name="item_send_app_closes_content">Disables Force Dark when an app in the Force Dark list is closed. This leads to more instances where Force Dark may not be applied quickly enough to an app when switching between apps.</string>
     <string name="item_check_for_updates_title">Check for updates on launch</string>
     <string name="item_check_for_updates_content">Automatically check for new releases when opening the app and prompt to install them directly.</string>
-    <string name="item_advanced_group_theme_title">Theme &amp; Updates</string>
-    <string name="item_advanced_group_background_title">Background Performance &amp; Monitoring</string>
+    <string name="item_advanced_group_service_title">Service &amp; Integration</string>
+    <string name="item_advanced_group_updates_title">Updates</string>
+    <string name="item_advanced_group_theme_title">Theme Options</string>
+    <string name="item_advanced_group_behaviour_title">App Behaviour</string>
     <string name="item_persistent_service_title">Keep service running in background</string>
     <string name="item_persistent_service_content">Runs a low-priority foreground service to prevent the OS from killing DarQ and Shizuku. Highly recommended for OxygenOS, ColorOS, and HyperOS.</string>
     <string name="item_persistent_notification_settings_title">Manage Notification</string>
@@ -29,8 +31,8 @@
     <string name="persistent_foreground_service_notification_content">Monitoring foreground apps to apply dark mode.</string>
     <string name="item_header_about">About</string>
     <string name="item_about_faq_title">Frequently Asked Questions</string>
-    <string name="item_about_title">DarQ v%1s</string>
-    <string name="item_about_content">Original app by Kieron Quinn / Quinny899\nMaintained &amp; updated by Mohit Arora / Arora-Sir</string>
+    <string name="item_about_title">DarQ Reborn v%1s</string>
+    <string name="item_about_content">Developed &amp; Maintained by &lt;a href="https://github.com/Arora-Sir">&lt;b>&lt;u>Mohit Arora / Arora-Sir&lt;/u>&lt;/b>&lt;/a&gt;. <br/><br/>Source code is available on &lt;a href="https://github.com/Arora-Sir/DarQ-Reborn">&lt;b>&lt;u>GitHub&lt;/u>&lt;/b>&lt;/a&gt;.</string>
     <string name="item_developer_options_title">Developer Options</string>
     <string name="item_developer_options_monet_color_picker_title">Monet Color Picker</string>
     <string name="item_developer_options_monet_color_picker_content">Pick a color to use from your wallpaper</string>
@@ -104,9 +106,10 @@
     <string name="dialog_location_permission_text">Allow <b>DarQ</b> to use your location to get sunrise &amp; sunset times?</string>
     <string name="dialog_location_permission_use_location">Use Location</string>
     <string name="dialog_location_permission_use_timezone">Use Time Zone\n<small>(less accurate)</small></string>
-    <string name="chip_donate">Donate</string>
+    <string name="chip_donate">Buy me a coffee</string>
     <string name="chip_twitter">X</string>
     <string name="chip_github">GitHub</string>
+    <string name="chip_socials">Socials</string>
     <string name="chip_xda">XDA Thread</string>
     <string name="menu_open_source_libraries">Open source libraries</string>
     <string name="bottom_sheet_update_available_title">Update Available</string>
@@ -127,5 +130,26 @@
     <string name="app_picker_header_all">Other Applications</string>
     <string name="item_boot_wait_shizuku_title">Wait for Shizuku on boot</string>
     <string name="item_boot_wait_shizuku_content">Waits for Shizuku to start up on boot before attempting connection, avoiding start-up failure notifications.</string>
+    <string name="item_check_for_prereleases_title">Check for pre-releases</string>
+    <string name="item_check_for_prereleases_content">Include beta and pre-release versions when checking for updates.</string>
+    <string name="donation_dialog_title">Buy me a coffee</string>
+    <string name="donation_dialog_upi_title">Pay via UPI</string>
+    <string name="donation_dialog_upi_summary">Pay using Google Pay, PhonePe, Paytm, BHIM, etc. (India)</string>
+    <string name="donation_dialog_global_title">PayPal</string>
+    <string name="donation_dialog_global_summary">Pay using global credit/debit cards or PayPal</string>
+
+    <string name="social_links_dialog_title">Developer Profiles</string>
+    <string name="social_website_title">Personal Website</string>
+    <string name="social_website_summary">mohit-arora.me</string>
+    <string name="social_github_profile_title">GitHub Profile</string>
+    <string name="social_github_profile_summary">github.com/Arora-Sir</string>
+    <string name="social_github_repo_title">GitHub Repository</string>
+    <string name="social_github_repo_summary">Arora-Sir/DarQ-Reborn</string>
+    <string name="social_twitter_title">X (Twitter)</string>
+    <string name="social_twitter_summary">x.com/arorasir</string>
+    <string name="social_instagram_title">Instagram</string>
+    <string name="social_instagram_summary">instagram.com/arora.sir</string>
+    <string name="social_reddit_title">Reddit</string>
+    <string name="social_reddit_summary">reddit.com/user/AroraSir</string>
 
 </resources>

@@ -176,4 +176,24 @@
         app:enterAnim="@android:anim/fade_in"
         app:exitAnim="@android:anim/fade_out" />
 
+    <dialog
+        android:id="@+id/donationBottomSheetFragment"
+        android:name="com.kieronquinn.app.darq.ui.screens.bottomsheets.donation.DonationBottomSheetFragment"
+        android:label=" "
+        tools:layout="@layout/fragment_bottom_sheet_donation" />
+
+    <action
+        android:id="@+id/action_global_donationBottomSheetFragment"
+        app:destination="@id/donationBottomSheetFragment" />
+
+    <dialog
+        android:id="@+id/socialLinksBottomSheetFragment"
+        android:name="com.kieronquinn.app.darq.ui.screens.bottomsheets.social.SocialLinksBottomSheetFragment"
+        android:label=" "
+        tools:layout="@layout/fragment_bottom_sheet_social_links" />
+
+    <action
+        android:id="@+id/action_global_socialLinksBottomSheetFragment"
+        app:destination="@id/socialLinksBottomSheetFragment" />
+
 </navigation>

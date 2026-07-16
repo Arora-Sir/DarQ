@@ -13,6 +13,10 @@ If you are using Shizuku and want the service to automatically run on boot, you 
 - [Modded Shizuku (GitHub)](https://github.com/thedjchi/Shizuku)
 - [Modded Shizuku Releases](https://github.com/thedjchi/Shizuku/releases)
 
+### Who originally created DarQ?
+
+DarQ was originally created by [Kieron Quinn](https://github.com/KieronQuinn) ([DarQ](https://github.com/KieronQuinn/DarQ)). It is now maintained, updated, and extended by [Mohit Arora](https://github.com/Arora-Sir) ([DarQ Reborn](https://github.com/Arora-Sir/DarQ-Reborn)).
+
 ### Why does upgrading from the official v2.2.1 release throw an "invalid package" error?
 
 Because this is a community-maintained fork, the APK is signed with a different private developer certificate than the original release. Android blocks upgrades with mismatched signatures for security reasons.
@@ -85,6 +89,14 @@ During testing; LinkedIn, Facebook and Google Opinion Rewards were found to be u
 ### Can Force Dark be made to work on all apps without Xposed?
 
 No. Apps are able to disable force dark in code, so Xposed is the only way to prevent that.
+
+### How should I configure the LSPosed / Xposed scope for DarQ?
+
+For the Xposed module to function correctly, you must configure both LSPosed and DarQ:
+
+1. **LSPosed Manager**: Check/enable the target applications in the **DarQ module scope** within the LSPosed Manager. This allows the module to hook into those applications.
+2. **DarQ App**: Select the same applications in DarQ's app picker (unless you have enabled **"Always use Force Dark"** in Advanced Options, which automatically enables it for all scoped apps).
+3. **System Framework**: Do **not** select "System Framework" in the LSPosed scope. DarQ only needs to hook individual application processes to enable Force Dark; hooking the system framework is unnecessary and can cause system UI overhead.
 
 ### Why does the status bar invert (have black icons) when force dark is enabled? Can it be fixed?
 

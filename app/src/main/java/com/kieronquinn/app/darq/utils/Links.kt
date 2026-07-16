@@ -18,6 +18,7 @@ fun Context.openLink(url: String){
 object Links {
     const val LINK_XDA = "https://kieronquinn.co.uk/redirect/DarQ/xda"
     const val LINK_TWITTER = "https://x.com/MohitAr0rA"
-    const val LINK_DONATE = "https://kieronquinn.co.uk/redirect/DarQ/donate"
+    const val LINK_DONATE = "https://paypal.me/arorasir"
     const val LINK_GITHUB = "https://github.com/Arora-Sir/DarQ-Reborn"
+    const val LINK_UPI = "upi://pay?pa=mohit1998arora@yescred"
 }

@@ -50,6 +50,8 @@ class ContainerFragment: BoundFragment<FragmentContainerBinding>(FragmentContain
 
     private val navigation by inject<Navigation>()
 
+    private val fragmentExpandedState = HashMap<String, Boolean>()
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         setupBackground()
@@ -70,7 +72,9 @@ class ContainerFragment: BoundFragment<FragmentContainerBinding>(FragmentContain
     }
 
     private fun setupBackground(){
-        binding.root.setBackgroundColor(monet.getBackgroundColor(requireContext()))
+        val backgroundColor = monet.getBackgroundColor(requireContext())
+        binding.root.setBackgroundColor(backgroundColor)
+        binding.appBar.setBackgroundColor(android.graphics.Color.TRANSPARENT)
     }
 
     private fun setupInsets(){
@@ -111,6 +115,12 @@ class ContainerFragment: BoundFragment<FragmentContainerBinding>(FragmentContain
         with(binding){
             collapsingToolbar.title = getString(R.string.app_name)
             appBar.setExpanded(!requireContext().isLandscape && getTopFragment() is AutoExpandOnRotate)
+            appBar.addOnOffsetChangedListener(AppBarLayout.OnOffsetChangedListener { appBarLayout, verticalOffset ->
+                val currentDestClass = (navController.currentDestination as? androidx.navigation.fragment.FragmentNavigator.Destination)?.className
+                if (currentDestClass != null) {
+                    fragmentExpandedState[currentDestClass] = (verticalOffset == 0)
+                }
+            })
             toolbar.setNavigationOnClickListener {
                 lifecycleScope.launchWhenResumed {
                     navigation.navigateBack()
@@ -152,7 +162,11 @@ class ContainerFragment: BoundFragment<FragmentContainerBinding>(FragmentContain
             )
         }
         if(activity?.isFinishing != true) {
-            binding.appBar.setExpanded(true, true)
+            val isDialog = navController.currentDestination?.navigatorName == "dialog"
+            val isBack = navigationEvent is Navigation.NavigationEvent.Back || navigationEvent is Navigation.NavigationEvent.PopupTo
+            if (!isDialog && !isBack) {
+                binding.appBar.setExpanded(true, false)
+            }
             activity?.hideKeyboard()
         }
     }
@@ -226,6 +240,8 @@ class ContainerFragment: BoundFragment<FragmentContainerBinding>(FragmentContain
             binding.collapsingToolbar.title = it
             binding.toolbar.title = it
         }
+        val isExpanded = fragmentExpandedState[topFragment::class.java.name] ?: (topFragment is AutoExpandOnRotate)
+        binding.appBar.setExpanded(isExpanded, false)
     }
 
     private fun setupMenu(menuProvider: ProvidesOverflow?){
@@ -305,9 +321,13 @@ class ContainerFragment: BoundFragment<FragmentContainerBinding>(FragmentContain
     private fun setupAutoDarkService(){
         lifecycleScope.launchWhenResumed {
             sharedViewModel.autoDarkServiceStartBus.collect {
-                requireContext().startForegroundService(Intent(requireContext(), DarqAutoDarkForegroundService::class.java).apply {
-                    putExtra(DarqAutoDarkForegroundService.KEY_JUST_RESCHEDULE, true)
-                })
+                try {
+                    requireContext().startForegroundService(Intent(requireContext(), DarqAutoDarkForegroundService::class.java).apply {
+                        putExtra(DarqAutoDarkForegroundService.KEY_JUST_RESCHEDULE, true)
+                    })
+                } catch (e: Exception) {
+                    android.util.Log.e("ContainerFragment", "Failed to start auto dark service", e)
+                }
             }
         }
     }

@@ -13,10 +13,14 @@ class BootReceiver: BroadcastReceiver() {
     override fun onReceive(context: Context?, intent: Intent?) {
         if(context == null || intent?.action != Intent.ACTION_BOOT_COMPLETED) return
         val settings = GlobalContext.get().get<DarqSharedPreferences>()
-        if (settings.persistentService) {
-            context.startForegroundService(Intent(context, DarqPersistentService::class.java))
-        } else {
-            context.startForegroundService(Intent(context, BootForegroundService::class.java))
+        try {
+            if (settings.persistentService) {
+                context.startForegroundService(Intent(context, DarqPersistentService::class.java))
+            } else {
+                context.startForegroundService(Intent(context, BootForegroundService::class.java))
+            }
+        } catch (e: Exception) {
+            android.util.Log.e("BootReceiver", "Failed to start service on boot", e)
         }
     }
 

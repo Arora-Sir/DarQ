@@ -17,9 +17,13 @@ class DarqSunriseSunsetWork(private val context: Context, workerParams: WorkerPa
 
     override fun doWork(): Result {
         //Start the foreground service
-        context.startForegroundService(Intent(context, DarqAutoDarkForegroundService::class.java).apply {
-            putExtra(DarqAutoDarkForegroundService.KEY_ENABLE_DARK, isDarkMode)
-        })
+        try {
+            context.startForegroundService(Intent(context, DarqAutoDarkForegroundService::class.java).apply {
+                putExtra(DarqAutoDarkForegroundService.KEY_ENABLE_DARK, isDarkMode)
+            })
+        } catch (e: Exception) {
+            android.util.Log.e("DarqSunriseSunsetWork", "Failed to start auto-dark service", e)
+        }
         return Result.success()
     }
 

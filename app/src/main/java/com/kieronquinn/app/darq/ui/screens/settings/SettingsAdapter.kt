@@ -8,10 +8,13 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView
+import androidx.navigation.findNavController
 import androidx.viewbinding.ViewBinding
 import com.kieronquinn.app.darq.databinding.*
 import com.kieronquinn.app.darq.model.settings.SettingsItem
 import com.kieronquinn.app.darq.model.settings.SettingsItemType
+import com.kieronquinn.app.darq.R
+import android.content.DialogInterface
 import com.kieronquinn.app.darq.utils.Links
 import com.kieronquinn.app.darq.ui.utils.MultiTapDetector
 import com.kieronquinn.app.darq.utils.openLink
@@ -92,7 +95,11 @@ class SettingsAdapter(context: Context, private var items: List<SettingsItem>): 
         }
         item.tapAction?.let { action ->
             root.setOnClickListener {
-                action.invoke()
+                root.isPressed = false
+                root.clearFocus()
+                root.postDelayed({
+                    action.invoke()
+                }, 150)
             }
         }
         if(!item.centerIconVertically){
@@ -101,12 +108,17 @@ class SettingsAdapter(context: Context, private var items: List<SettingsItem>): 
     }
 
     private fun setupTripleTapActionSetting(binding: ItemSettingAboutBinding, item: SettingsItem.AboutSetting) = with(binding) {
+        val secondaryBackground = monet.getBackgroundColorSecondary(root.context) ?: monet.getBackgroundColor(root.context)
+        val backgroundTint = android.content.res.ColorStateList.valueOf(secondaryBackground)
+        chipSocials.chipBackgroundColor = backgroundTint
+
         itemSettingTitle.text = item.title
         if(item.content.isNullOrEmpty()){
             itemSettingContent.isVisible = false
         }else{
             itemSettingContent.isVisible = true
-            itemSettingContent.text = item.content
+            itemSettingContent.text = android.text.Html.fromHtml(item.content.toString(), android.text.Html.FROM_HTML_MODE_LEGACY)
+            itemSettingContent.movementMethod = android.text.method.LinkMovementMethod.getInstance()
         }
         if(item.icon != 0) {
             itemSettingIcon.setImageResource(item.icon)
@@ -115,22 +127,34 @@ class SettingsAdapter(context: Context, private var items: List<SettingsItem>): 
         }
         item.tripleTapAction?.let { action ->
             MultiTapDetector(root){ tapCount, lastTap ->
-                if(lastTap && tapCount >= 3){
-                    action.invoke()
+                if(lastTap){
+                    if(tapCount >= 3){
+                        action.invoke()
+                    }
                 }
             }
         }
-        binding.chipDonate.setOnClickListener {
-            it.context.openLink(Links.LINK_DONATE)
+        binding.chipDonate.setOnClickListener { chip ->
+            chip.isPressed = false
+            chip.clearFocus()
+            chip.postDelayed({
+                try {
+                    chip.findNavController().navigate(R.id.action_global_donationBottomSheetFragment)
+                } catch (e: Exception) {
+                    android.util.Log.e("SettingsAdapter", "Navigation to donation bottom sheet failed", e)
+                }
+            }, 150)
         }
-        binding.chipTwitter.setOnClickListener {
-            it.context.openLink(Links.LINK_TWITTER)
-        }
-        binding.chipGithub.setOnClickListener {
-            it.context.openLink(Links.LINK_GITHUB)
-        }
-        binding.chipXda.setOnClickListener {
-            it.context.openLink(Links.LINK_XDA)
+        binding.chipSocials.setOnClickListener { chip ->
+            chip.isPressed = false
+            chip.clearFocus()
+            chip.postDelayed({
+                try {
+                    chip.findNavController().navigate(R.id.action_global_socialLinksBottomSheetFragment)
+                } catch (e: Exception) {
+                    android.util.Log.e("SettingsAdapter", "Navigation to social links bottom sheet failed", e)
+                }
+            }, 150)
         }
     }
 
