@@ -1,5 +1,6 @@
 package com.kieronquinn.app.darq.ui.screens.bottomsheets.update
 
+import android.content.DialogInterface
 import android.os.Bundle
 import android.view.View
 import android.widget.Toast
@@ -17,6 +18,11 @@ import kotlinx.coroutines.launch
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class UpdateDownloadBottomSheetFragment: BaseBottomSheetFragment<FragmentBottomSheetUpdateDownloadBinding>(FragmentBottomSheetUpdateDownloadBinding::inflate) {
+
+    override fun onDismiss(dialog: DialogInterface) {
+        super.onDismiss(dialog)
+        sharedViewModel.clearUpdate()
+    }
 
     private val updateViewModel by viewModel<UpdateDownloadBottomSheetViewModel>()
 
@@ -74,6 +80,9 @@ class UpdateDownloadBottomSheetFragment: BaseBottomSheetFragment<FragmentBottomS
                     is UpdateDownloadBottomSheetViewModel.State.Failed -> {
                         Toast.makeText(requireContext(), R.string.bs_update_download_failed, Toast.LENGTH_LONG).show()
                         dismiss()
+                    }
+                    UpdateDownloadBottomSheetViewModel.State.Idle -> {
+                        // Do nothing
                     }
                 }
             }

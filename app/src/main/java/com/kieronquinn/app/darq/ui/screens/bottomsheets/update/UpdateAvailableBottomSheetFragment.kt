@@ -1,5 +1,6 @@
 package com.kieronquinn.app.darq.ui.screens.bottomsheets.update
 
+import android.content.DialogInterface
 import android.os.Bundle
 import android.view.View
 import androidx.lifecycle.lifecycleScope
@@ -41,12 +42,15 @@ class UpdateAvailableBottomSheetFragment: BaseBottomSheetDialogFragment() {
         getString(R.string.bottom_sheet_update_available_neutral)
     }
 
+    private var navigatingToDownload = false
+
     override fun onNegativeClicked(dialog: BottomSheetDialog) {
         sharedViewModel.clearUpdate()
         super.onNegativeClicked(dialog)
     }
 
     override fun onPositiveClicked(dialog: BottomSheetDialog) {
+        navigatingToDownload = true
         lifecycleScope.launchWhenResumed {
             navigation.navigate(UpdateAvailableBottomSheetFragmentDirections.actionUpdateAvailableBottomSheetFragmentToUpdateDownloadBottomSheetFragment())
             dismiss()
@@ -62,6 +66,13 @@ class UpdateAvailableBottomSheetFragment: BaseBottomSheetDialogFragment() {
     override fun onNeutralClicked(dialog: BottomSheetDialog) {
         update?.releaseUrl?.let {
             requireContext().openLink(it)
+        }
+    }
+
+    override fun onDismiss(dialog: DialogInterface) {
+        super.onDismiss(dialog)
+        if (!navigatingToDownload) {
+            sharedViewModel.clearUpdate()
         }
     }
 

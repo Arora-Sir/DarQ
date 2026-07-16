@@ -15,6 +15,7 @@ import com.kieronquinn.app.darq.BuildConfig
 import com.kieronquinn.app.darq.R
 import com.kieronquinn.app.darq.components.github.UpdateChecker
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -24,7 +25,7 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 import java.io.File
 import java.io.FileOutputStream
-import java.util.concurrent.TimeUnit
+import java.io.IOException
 
 abstract class UpdateDownloadBottomSheetViewModel : ViewModel() {
 
@@ -49,16 +50,16 @@ class UpdateDownloadBottomSheetViewModelImpl : UpdateDownloadBottomSheetViewMode
         private const val CHANNEL_ID = "darq_update_download"
     }
 
-    private var _downloadState = MutableStateFlow<State>(State.Idle)
-    override val downloadState = _downloadState.asStateFlow()
-
     private val okHttpClient by lazy {
-        OkHttpClient.Builder()
-            .connectTimeout(60, TimeUnit.SECONDS)
-            .readTimeout(60, TimeUnit.SECONDS)
-            .writeTimeout(60, TimeUnit.SECONDS)
+        okhttp3.OkHttpClient.Builder()
+            .connectTimeout(60, java.util.concurrent.TimeUnit.SECONDS)
+            .readTimeout(60, java.util.concurrent.TimeUnit.SECONDS)
+            .writeTimeout(60, java.util.concurrent.TimeUnit.SECONDS)
             .build()
     }
+
+    private var _downloadState = MutableStateFlow<State>(State.Idle)
+    override val downloadState = _downloadState.asStateFlow()
 
     // ── Notification helpers ──────────────────────────────────────────────
 
@@ -178,20 +179,25 @@ class UpdateDownloadBottomSheetViewModelImpl : UpdateDownloadBottomSheetViewMode
             showProgressNotification(context, 0)
 
             withContext(Dispatchers.IO) {
+                val downloadFolder = File(context.cacheDir, "updates").also { it.mkdirs() }
+                val outputFile = File(downloadFolder, fileName)
                 try {
-                    val downloadFolder = File(context.cacheDir, "updates").also { it.mkdirs() }
-                    val outputFile = File(downloadFolder, fileName)
+                    if (outputFile.exists()) {
+                        outputFile.delete()
+                    }
 
                     val request = Request.Builder().url(url).build()
                     val response = okHttpClient.newCall(request).execute()
 
                     if (!response.isSuccessful) {
+                        if (outputFile.exists()) outputFile.delete()
                         cancelNotification(context)
                         _downloadState.emit(State.Failed)
                         return@withContext
                     }
 
                     val body = response.body() ?: run {
+                        if (outputFile.exists()) outputFile.delete()
                         cancelNotification(context)
                         _downloadState.emit(State.Failed)
                         return@withContext
@@ -207,6 +213,7 @@ class UpdateDownloadBottomSheetViewModelImpl : UpdateDownloadBottomSheetViewMode
                             val buffer = ByteArray(8192)
                             var bytesRead: Int
                             while (input.read(buffer).also { bytesRead = it } != -1) {
+                                ensureActive()
                                 output.write(buffer, 0, bytesRead)
                                 downloadedBytes += bytesRead
                                 if (totalBytes > 0) {
@@ -236,6 +243,11 @@ class UpdateDownloadBottomSheetViewModelImpl : UpdateDownloadBottomSheetViewMode
                     _downloadState.emit(State.Done(outputUri))
 
                 } catch (e: Exception) {
+                    try {
+                        if (outputFile.exists()) {
+                            outputFile.delete()
+                        }
+                    } catch (ex: Exception) {}
                     cancelNotification(context)
                     _downloadState.emit(State.Failed)
                 }
