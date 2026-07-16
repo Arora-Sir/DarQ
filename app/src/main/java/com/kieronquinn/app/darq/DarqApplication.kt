@@ -2,8 +2,12 @@ package com.kieronquinn.app.darq
 
 import android.app.Application
 import android.app.DownloadManager
+import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import android.content.IntentFilter
+import android.os.Build
+import android.os.Handler
 import android.util.Log
 import com.kieronquinn.app.darq.service.background.DarqPersistentService
 import com.kieronquinn.app.darq.components.github.UpdateChecker
@@ -106,6 +110,63 @@ class DarqApplication : Application() {
             val selectedColor = settings.monetColor
             if(selectedColor != Integer.MAX_VALUE && it?.contains(selectedColor) == true) selectedColor
             else it?.firstOrNull()
+        }
+    }
+
+    override fun registerReceiver(receiver: BroadcastReceiver?, filter: IntentFilter?): Intent? {
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            super.registerReceiver(receiver, filter, RECEIVER_EXPORTED)
+        } else {
+            super.registerReceiver(receiver, filter)
+        }
+    }
+
+    override fun registerReceiver(
+        receiver: BroadcastReceiver?,
+        filter: IntentFilter?,
+        flags: Int
+    ): Intent? {
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            val updatedFlags = if ((flags and RECEIVER_EXPORTED == 0) && (flags and RECEIVER_NOT_EXPORTED == 0)) {
+                flags or RECEIVER_EXPORTED
+            } else {
+                flags
+            }
+            super.registerReceiver(receiver, filter, updatedFlags)
+        } else {
+            super.registerReceiver(receiver, filter, flags)
+        }
+    }
+
+    override fun registerReceiver(
+        receiver: BroadcastReceiver?,
+        filter: IntentFilter?,
+        broadcastPermission: String?,
+        scheduler: Handler?
+    ): Intent? {
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            super.registerReceiver(receiver, filter, broadcastPermission, scheduler, RECEIVER_EXPORTED)
+        } else {
+            super.registerReceiver(receiver, filter, broadcastPermission, scheduler)
+        }
+    }
+
+    override fun registerReceiver(
+        receiver: BroadcastReceiver?,
+        filter: IntentFilter?,
+        broadcastPermission: String?,
+        scheduler: Handler?,
+        flags: Int
+    ): Intent? {
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            val updatedFlags = if ((flags and RECEIVER_EXPORTED == 0) && (flags and RECEIVER_NOT_EXPORTED == 0)) {
+                flags or RECEIVER_EXPORTED
+            } else {
+                flags
+            }
+            super.registerReceiver(receiver, filter, broadcastPermission, scheduler, updatedFlags)
+        } else {
+            super.registerReceiver(receiver, filter, broadcastPermission, scheduler, flags)
         }
     }
 
