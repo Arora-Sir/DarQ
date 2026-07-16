@@ -7,6 +7,7 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Build
+import android.util.Log
 import androidx.core.app.NotificationCompat
 import androidx.core.content.FileProvider
 import androidx.lifecycle.ViewModel
@@ -39,7 +40,7 @@ abstract class UpdateDownloadBottomSheetViewModel : ViewModel() {
         object Idle : State()
         data class Downloading(val progress: Int) : State()
         data class Done(val fileUri: Uri) : State()
-        object Failed : State()
+        data class Failed(val errorMsg: String? = null) : State()
     }
 }
 
@@ -192,14 +193,14 @@ class UpdateDownloadBottomSheetViewModelImpl : UpdateDownloadBottomSheetViewMode
                     if (!response.isSuccessful) {
                         if (outputFile.exists()) outputFile.delete()
                         cancelNotification(context)
-                        _downloadState.emit(State.Failed)
+                        _downloadState.emit(State.Failed("HTTP Error: ${response.code()}"))
                         return@withContext
                     }
 
                     val body = response.body() ?: run {
                         if (outputFile.exists()) outputFile.delete()
                         cancelNotification(context)
-                        _downloadState.emit(State.Failed)
+                        _downloadState.emit(State.Failed("Empty response body"))
                         return@withContext
                     }
 
@@ -243,13 +244,14 @@ class UpdateDownloadBottomSheetViewModelImpl : UpdateDownloadBottomSheetViewMode
                     _downloadState.emit(State.Done(outputUri))
 
                 } catch (e: Exception) {
+                    Log.e("DarQUpdate", "Download failed", e)
                     try {
                         if (outputFile.exists()) {
                             outputFile.delete()
                         }
                     } catch (ex: Exception) {}
                     cancelNotification(context)
-                    _downloadState.emit(State.Failed)
+                    _downloadState.emit(State.Failed(e.toString()))
                 }
             }
         }

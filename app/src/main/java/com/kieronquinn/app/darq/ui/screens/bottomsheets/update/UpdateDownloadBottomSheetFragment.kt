@@ -78,7 +78,8 @@ class UpdateDownloadBottomSheetFragment: BaseBottomSheetFragment<FragmentBottomS
                         }
                     }
                     is UpdateDownloadBottomSheetViewModel.State.Failed -> {
-                        Toast.makeText(requireContext(), R.string.bs_update_download_failed, Toast.LENGTH_LONG).show()
+                        val message = state.errorMsg?.let { "Download failed: $it" } ?: getString(R.string.bs_update_download_failed)
+                        Toast.makeText(requireContext(), message, Toast.LENGTH_LONG).show()
                         dismiss()
                     }
                     UpdateDownloadBottomSheetViewModel.State.Idle -> {
