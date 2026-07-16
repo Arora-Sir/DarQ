@@ -33,6 +33,16 @@ If your device is not rooted, you must set up **Shizuku** before running DarQ:
 > * **OPPO / OnePlus / Realme:** You must enable the **"Disable permission monitoring"** (or **"Disable system optimization"** in newer builds) setting in Developer Options to prevent the OS from blocking the connection.
 > * **Background Service Termination (OnePlus / Oppo / Xiaomi):** If you find that you have to manually open DarQ to make apps dark again after a while, the system has killed the background DarQ process. Go to **Advanced Options** in the app, enable **"Keep service running in background"**, and click **"Manage Notification"** to hide or minimize the status bar icon if desired.
 
+### Automation & ADB Triggering (MacroDroid/Tasker)
+If you use automation apps (such as MacroDroid, Tasker, or Automate) and want to start DarQ's background service externally, you can send an explicit broadcast:
+* **Action**: `com.kieronquinn.app.darq.ACTION_START_SERVICE`
+* **Package**: `com.kieronquinn.app.darq`
+
+Alternatively, you can trigger it via ADB shell:
+
+```bash
+adb shell am broadcast -a com.kieronquinn.app.darq.ACTION_START_SERVICE -p com.kieronquinn.app.darq
+```
 
 DarQ also provides an option to apply the system dark theme (as well as selectable force dark) only after sunset and before sunrise, protecting your eyes when it's most needed. 
 
