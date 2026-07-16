@@ -8,6 +8,7 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.updatePadding
 import androidx.lifecycle.lifecycleScope
+import android.util.Log
 import com.kieronquinn.app.darq.R
 import com.kieronquinn.app.darq.databinding.FragmentBottomSheetUpdateDownloadBinding
 import com.kieronquinn.app.darq.ui.base.BaseBottomSheetFragment
@@ -20,6 +21,7 @@ import org.koin.androidx.viewmodel.ext.android.viewModel
 class UpdateDownloadBottomSheetFragment: BaseBottomSheetFragment<FragmentBottomSheetUpdateDownloadBinding>(FragmentBottomSheetUpdateDownloadBinding::inflate) {
 
     override fun onDismiss(dialog: DialogInterface) {
+        Log.d("DarQUpdate", "UpdateDownloadBottomSheetFragment: onDismiss - clearing update state")
         super.onDismiss(dialog)
         sharedViewModel.clearUpdate()
     }
@@ -35,8 +37,10 @@ class UpdateDownloadBottomSheetFragment: BaseBottomSheetFragment<FragmentBottomS
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        Log.d("DarQUpdate", "UpdateDownloadBottomSheetFragment: onViewCreated. Available update: $update")
         super.onViewCreated(view, savedInstanceState)
         binding.fragmentUpdateDownloadCancel.setOnClickListener {
+            Log.d("DarQUpdate", "UpdateDownloadBottomSheetFragment: Cancel button clicked, cancelling download")
             updateViewModel.cancelDownload(requireContext())
             dismiss()
         }
@@ -52,6 +56,7 @@ class UpdateDownloadBottomSheetFragment: BaseBottomSheetFragment<FragmentBottomS
         binding.fragmentUpdateDownloadInstall.setTextColor(accentColor)
         viewLifecycleOwner.lifecycleScope.launch {
             updateViewModel.downloadState.collect { state ->
+                Log.d("DarQUpdate", "UpdateDownloadBottomSheetFragment: State update received = $state")
                 when(state){
                     is UpdateDownloadBottomSheetViewModel.State.Downloading -> {
                         if(state.progress > 0) {
@@ -60,18 +65,21 @@ class UpdateDownloadBottomSheetFragment: BaseBottomSheetFragment<FragmentBottomS
                         }
                     }
                     is UpdateDownloadBottomSheetViewModel.State.Done -> {
+                        Log.d("DarQUpdate", "UpdateDownloadBottomSheetFragment: Download Done. FileUri: ${state.fileUri}")
                         binding.fragmentUpdateDownloadTitle.text = getString(R.string.download_complete)
                         binding.fragmentUpdateDownloadProgress.isIndeterminate = false
                         binding.fragmentUpdateDownloadProgress.progress = 100
 
                         binding.fragmentUpdateDownloadCancel.text = getString(R.string.close)
                         binding.fragmentUpdateDownloadCancel.setOnClickListener {
+                            Log.d("DarQUpdate", "UpdateDownloadBottomSheetFragment: Close button clicked after download complete")
                             sharedViewModel.clearUpdate()
                             dismiss()
                         }
 
                         binding.fragmentUpdateDownloadInstall.visibility = View.VISIBLE
                         binding.fragmentUpdateDownloadInstall.setOnClickListener {
+                            Log.d("DarQUpdate", "UpdateDownloadBottomSheetFragment: Install button clicked, calling openPackageInstaller")
                             updateViewModel.openPackageInstaller(requireContext(), state.fileUri)
                             sharedViewModel.clearUpdate()
                             dismiss()
@@ -79,18 +87,21 @@ class UpdateDownloadBottomSheetFragment: BaseBottomSheetFragment<FragmentBottomS
                     }
                     is UpdateDownloadBottomSheetViewModel.State.Failed -> {
                         val message = state.errorMsg?.let { "Download failed: $it" } ?: getString(R.string.bs_update_download_failed)
+                        Log.e("DarQUpdate", "UpdateDownloadBottomSheetFragment: Download Failed, showing Toast: $message")
                         Toast.makeText(requireContext(), message, Toast.LENGTH_LONG).show()
                         dismiss()
                     }
                     UpdateDownloadBottomSheetViewModel.State.Idle -> {
-                        // Do nothing
+                        Log.d("DarQUpdate", "UpdateDownloadBottomSheetFragment: State is Idle")
                     }
                 }
             }
         }
         update?.let {
+            Log.d("DarQUpdate", "UpdateDownloadBottomSheetFragment: Starting download for update: ${it.name}, assetUrl: ${it.assetUrl}")
             updateViewModel.startDownload(requireContext(), it)
         } ?: run {
+            Log.e("DarQUpdate", "UpdateDownloadBottomSheetFragment: Update is null inside onViewCreated, dismissing bottom sheet")
             dismiss()
         }
     }

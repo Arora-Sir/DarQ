@@ -68,17 +68,21 @@ class UpdateDownloadBottomSheetViewModelImpl : UpdateDownloadBottomSheetViewMode
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val nm = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
             if (nm.getNotificationChannel(CHANNEL_ID) == null) {
+                Log.d("DarQUpdate", "ensureNotificationChannel: Creating channel: $CHANNEL_ID")
                 val channel = NotificationChannel(
                     CHANNEL_ID,
                     context.getString(R.string.app_name) + " Updates",
                     NotificationManager.IMPORTANCE_LOW
                 )
                 nm.createNotificationChannel(channel)
+            } else {
+                Log.d("DarQUpdate", "ensureNotificationChannel: Channel $CHANNEL_ID already exists")
             }
         }
     }
 
     private fun showProgressNotification(context: Context, progress: Int) {
+        Log.d("DarQUpdate", "showProgressNotification: progress = $progress")
         ensureNotificationChannel(context)
         val nm = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         val notification = NotificationCompat.Builder(context, CHANNEL_ID)
@@ -93,6 +97,7 @@ class UpdateDownloadBottomSheetViewModelImpl : UpdateDownloadBottomSheetViewMode
     }
 
     private fun showSizeProgressNotification(context: Context, downloadedBytes: Long) {
+        Log.d("DarQUpdate", "showSizeProgressNotification: downloadedBytes = $downloadedBytes")
         ensureNotificationChannel(context)
         val nm = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         val sizeMB = downloadedBytes / (1024.0 * 1024.0)
@@ -109,6 +114,7 @@ class UpdateDownloadBottomSheetViewModelImpl : UpdateDownloadBottomSheetViewMode
     }
 
     private fun showCompletedNotification(context: Context, uri: Uri) {
+        Log.d("DarQUpdate", "showCompletedNotification: uri = $uri")
         ensureNotificationChannel(context)
         val nm = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
@@ -144,11 +150,13 @@ class UpdateDownloadBottomSheetViewModelImpl : UpdateDownloadBottomSheetViewMode
             .setPriority(NotificationCompat.PRIORITY_HIGH)
             .build()
 
+        Log.d("DarQUpdate", "showCompletedNotification: Cancelling progress notification ID: $NOTIFICATION_ID, notifying 1001")
         nm.cancel(NOTIFICATION_ID)
         nm.notify(1001, notification)
     }
 
     private fun cancelNotification(context: Context) {
+        Log.d("DarQUpdate", "cancelNotification: Cancelling notification ID: $NOTIFICATION_ID")
         val nm = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         nm.cancel(NOTIFICATION_ID)
     }
@@ -156,44 +164,62 @@ class UpdateDownloadBottomSheetViewModelImpl : UpdateDownloadBottomSheetViewMode
     // ── Download logic ────────────────────────────────────────────────────
 
     override fun startDownload(context: Context, update: UpdateChecker.Update) {
+        Log.d("DarQUpdate", "startDownload: Triggered for update: $update")
         _downloadState.value = State.Idle
         val downloadFolder = File(context.cacheDir, "updates")
         val existingFile = File(downloadFolder, update.assetName)
+        Log.d("DarQUpdate", "startDownload: File path = ${existingFile.absolutePath}, exists = ${existingFile.exists()}, length = ${existingFile.length()}")
         if (existingFile.exists() && existingFile.length() > 0) {
+            Log.d("DarQUpdate", "startDownload: Cached update file found, bypassing network call")
             viewModelScope.launch {
-                val outputUri = FileProvider.getUriForFile(
-                    context,
-                    BuildConfig.APPLICATION_ID + ".provider",
-                    existingFile
-                )
-                showCompletedNotification(context, outputUri)
-                _downloadState.emit(State.Done(outputUri))
+                try {
+                    val outputUri = FileProvider.getUriForFile(
+                        context,
+                        BuildConfig.APPLICATION_ID + ".provider",
+                        existingFile
+                    )
+                    Log.d("DarQUpdate", "startDownload: FileProvider URI created: $outputUri")
+                    showCompletedNotification(context, outputUri)
+                    _downloadState.emit(State.Done(outputUri))
+                } catch (e: Exception) {
+                    Log.e("DarQUpdate", "startDownload: Error getting FileProvider URI for existing file", e)
+                    _downloadState.emit(State.Failed("Cache error: " + e.message))
+                }
             }
         } else {
+            Log.d("DarQUpdate", "startDownload: No valid cached update file, performing download")
             downloadUpdate(context, update.assetUrl, update.assetName)
         }
     }
 
     private fun downloadUpdate(context: Context, url: String, fileName: String) {
+        Log.d("DarQUpdate", "downloadUpdate: URL = $url, fileName = $fileName")
         viewModelScope.launch {
             _downloadState.emit(State.Downloading(0))
             showProgressNotification(context, 0)
 
             withContext(Dispatchers.IO) {
-                val downloadFolder = File(context.cacheDir, "updates").also { it.mkdirs() }
+                val downloadFolder = File(context.cacheDir, "updates").also {
+                    val created = it.mkdirs()
+                    Log.d("DarQUpdate", "downloadUpdate: Cache updates folder: exists=${it.exists()} created=$created")
+                }
                 val outputFile = File(downloadFolder, fileName)
                 try {
                     if (outputFile.exists()) {
-                        outputFile.delete()
+                        val deleted = outputFile.delete()
+                        Log.d("DarQUpdate", "downloadUpdate: Deleted old file: $deleted")
                     }
 
+                    Log.d("DarQUpdate", "downloadUpdate: Preparing OkHttp request...")
                     val request = Request.Builder()
                         .url(url)
                         .header("User-Agent", "Mozilla/5.0 (Linux; Android 13; SM-S901B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Mobile Safari/537.36")
                         .build()
                     val response = okHttpClient.newCall(request).execute()
+                    Log.d("DarQUpdate", "downloadUpdate: OkHttp execution complete. Code = ${response.code()}, isSuccessful = ${response.isSuccessful}")
 
                     if (!response.isSuccessful) {
+                        Log.e("DarQUpdate", "downloadUpdate: Network request failed with code: ${response.code()}")
                         if (outputFile.exists()) outputFile.delete()
                         cancelNotification(context)
                         _downloadState.emit(State.Failed("HTTP Error: ${response.code()}"))
@@ -201,6 +227,7 @@ class UpdateDownloadBottomSheetViewModelImpl : UpdateDownloadBottomSheetViewMode
                     }
 
                     val body = response.body() ?: run {
+                        Log.e("DarQUpdate", "downloadUpdate: Response body is null")
                         if (outputFile.exists()) outputFile.delete()
                         cancelNotification(context)
                         _downloadState.emit(State.Failed("Empty response body"))
@@ -208,6 +235,7 @@ class UpdateDownloadBottomSheetViewModelImpl : UpdateDownloadBottomSheetViewMode
                     }
 
                     val totalBytes = body.contentLength()
+                    Log.d("DarQUpdate", "downloadUpdate: totalBytes = $totalBytes")
                     var downloadedBytes = 0L
                     var lastNotifiedProgress = -1
                     var lastNotifiedBytes = 0L
@@ -238,21 +266,27 @@ class UpdateDownloadBottomSheetViewModelImpl : UpdateDownloadBottomSheetViewMode
                         }
                     }
 
+                    Log.d("DarQUpdate", "downloadUpdate: Byte stream write complete. Total downloaded = $downloadedBytes bytes")
+
                     val outputUri = FileProvider.getUriForFile(
                         context,
                         BuildConfig.APPLICATION_ID + ".provider",
                         outputFile
                     )
+                    Log.d("DarQUpdate", "downloadUpdate: FileProvider URI created = $outputUri")
                     showCompletedNotification(context, outputUri)
                     _downloadState.emit(State.Done(outputUri))
 
                 } catch (e: Exception) {
-                    Log.e("DarQUpdate", "Download failed", e)
+                    Log.e("DarQUpdate", "downloadUpdate: Exception caught during update download", e)
                     try {
                         if (outputFile.exists()) {
-                            outputFile.delete()
+                            val deleted = outputFile.delete()
+                            Log.d("DarQUpdate", "downloadUpdate: Deleted partially downloaded file: $deleted")
                         }
-                    } catch (ex: Exception) {}
+                    } catch (ex: Exception) {
+                        Log.e("DarQUpdate", "downloadUpdate: Error deleting failed file", ex)
+                    }
                     cancelNotification(context)
                     _downloadState.emit(State.Failed(e.toString()))
                 }
@@ -261,17 +295,24 @@ class UpdateDownloadBottomSheetViewModelImpl : UpdateDownloadBottomSheetViewMode
     }
 
     override fun openPackageInstaller(context: Context, uri: Uri) {
-        Intent(Intent.ACTION_VIEW, uri).apply {
-            putExtra(Intent.EXTRA_NOT_UNKNOWN_SOURCE, true)
-            setDataAndType(uri, "application/vnd.android.package-archive")
-            flags = Intent.FLAG_ACTIVITY_NEW_TASK
-            addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-        }.also {
-            context.startActivity(it)
+        Log.d("DarQUpdate", "openPackageInstaller: uri = $uri")
+        try {
+            val intent = Intent(Intent.ACTION_VIEW, uri).apply {
+                putExtra(Intent.EXTRA_NOT_UNKNOWN_SOURCE, true)
+                setDataAndType(uri, "application/vnd.android.package-archive")
+                flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+            }
+            Log.d("DarQUpdate", "openPackageInstaller: Starting activity with intent: $intent")
+            context.startActivity(intent)
+            Log.d("DarQUpdate", "openPackageInstaller: Activity started successfully")
+        } catch (e: Exception) {
+            Log.e("DarQUpdate", "openPackageInstaller: Failed to start package installer activity", e)
         }
     }
 
     override fun cancelDownload(context: Context) {
+        Log.d("DarQUpdate", "cancelDownload: Cancel requested by user")
         cancelNotification(context)
         viewModelScope.launch {
             _downloadState.emit(State.Idle)

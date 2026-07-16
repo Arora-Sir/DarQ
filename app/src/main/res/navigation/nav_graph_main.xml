@@ -123,7 +123,9 @@
         tools:layout="@layout/fragment_bottom_sheet">
         <action
             android:id="@+id/action_updateAvailableBottomSheetFragment_to_updateDownloadBottomSheetFragment"
-            app:destination="@id/updateDownloadBottomSheetFragment" />
+            app:destination="@id/updateDownloadBottomSheetFragment"
+            app:popUpTo="@id/updateAvailableBottomSheetFragment"
+            app:popUpToInclusive="true" />
     </dialog>
     <action
         android:id="@+id/action_global_updateAvailableBottomSheetFragment"

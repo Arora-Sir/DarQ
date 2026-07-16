@@ -2,6 +2,7 @@ package com.kieronquinn.app.darq.components.github
 
 import android.content.Context
 import android.os.Parcelable
+import android.util.Log
 import com.kieronquinn.app.darq.BuildConfig
 import kotlinx.android.parcel.Parcelize
 import kotlinx.coroutines.Dispatchers
@@ -43,17 +44,28 @@ class UpdateChecker {
     }
 
     fun getLatestRelease() = callbackFlow {
+        Log.d("DarQUpdate", "getLatestRelease: Checking for update started")
         withContext(Dispatchers.IO){
             val release = getLatestReleaseResponse()
+            Log.d("DarQUpdate", "getLatestRelease: Fetched release response: $release")
             release?.let { gitHubReleaseResponse ->
                 val currentTag = gitHubReleaseResponse.tagName
+                Log.d("DarQUpdate", "getLatestRelease: Current remote tag = $currentTag, Local tag = ${BuildConfig.TAG_NAME}")
                 if (currentTag != null) {
                     val remoteNormalized = currentTag.replace("v", "").trim()
                     val localNormalized = BuildConfig.TAG_NAME.replace("v", "").trim()
+                    Log.d("DarQUpdate", "getLatestRelease: Normalized compare: remote=$remoteNormalized, local=$localNormalized")
                     if (remoteNormalized != localNormalized) {
+                        Log.d("DarQUpdate", "getLatestRelease: Remote tag differs from local tag, looking for apk asset")
+                        val assets = gitHubReleaseResponse.assets
+                        Log.d("DarQUpdate", "getLatestRelease: Total assets found: ${assets?.size ?: 0}")
+                        assets?.forEach {
+                            Log.d("DarQUpdate", "getLatestRelease: Found asset option: name=${it.name}, url=${it.browserDownloadUrl}")
+                        }
                         val asset =
                             gitHubReleaseResponse.assets?.firstOrNull { it.name?.endsWith(".apk") == true }
                         if (asset == null) {
+                            Log.e("DarQUpdate", "getLatestRelease: No asset ending in .apk found")
                             this@callbackFlow.trySend(null).isSuccess
                             return@let
                         }
@@ -62,58 +74,71 @@ class UpdateChecker {
                                 it.substring(0, it.lastIndexOf("/"))
                             }
                         val name = gitHubReleaseResponse.name ?: run {
+                            Log.e("DarQUpdate", "getLatestRelease: Release name is null")
                             this@callbackFlow.trySend(null).isSuccess
                             return@let
                         }
                         val body = gitHubReleaseResponse.body ?: run {
+                            Log.e("DarQUpdate", "getLatestRelease: Release body is null")
                             this@callbackFlow.trySend(null).isSuccess
                             return@let
                         }
                         val publishedAt = gitHubReleaseResponse.publishedAt ?: run {
+                            Log.e("DarQUpdate", "getLatestRelease: Release publishedAt is null")
                             this@callbackFlow.trySend(null).isSuccess
                             return@let
                         }
                         // Construct a unique filename for the version (e.g. DarQ_2.2.9.apk)
                         val uniqueAssetName = "DarQ_${currentTag}.apk"
-                        this@callbackFlow.trySend(
-                            Update(
-                                name,
-                                body,
-                                publishedAt,
-                                asset.browserDownloadUrl ?: RELEASES_URL,
-                                uniqueAssetName,
-                                releaseUrl ?: RELEASES_URL
-                            )
-                        ).isSuccess
+                        val updateObj = Update(
+                            name,
+                            body,
+                            publishedAt,
+                            asset.browserDownloadUrl ?: RELEASES_URL,
+                            uniqueAssetName,
+                            releaseUrl ?: RELEASES_URL
+                        )
+                        Log.d("DarQUpdate", "getLatestRelease: Emitting update: $updateObj")
+                        this@callbackFlow.trySend(updateObj).isSuccess
                     } else {
+                        Log.d("DarQUpdate", "getLatestRelease: Remote tag is the same as local tag. No update needed.")
                         this@callbackFlow.trySend(null).isSuccess
                     }
                 } else {
+                    Log.e("DarQUpdate", "getLatestRelease: Remote tag name is null")
                     this@callbackFlow.trySend(null).isSuccess
                 }
             } ?: run {
+                Log.e("DarQUpdate", "getLatestRelease: Release response is null")
                 this@callbackFlow.trySend(null).isSuccess
             }
         }
-        awaitClose {  }
+        awaitClose { Log.d("DarQUpdate", "getLatestRelease: callbackFlow closed") }
     }
 
     fun deleteStaleCache(context: Context, currentAssetName: String) {
         val folder = File(context.cacheDir, "updates")
+        Log.d("DarQUpdate", "deleteStaleCache: cache folder path = ${folder.absolutePath}, keeping currentAssetName = $currentAssetName")
         folder.listFiles()?.forEach { file ->
             if (file.name != currentAssetName) {
-                file.delete()
+                val deleted = file.delete()
+                Log.d("DarQUpdate", "deleteStaleCache: Deleted stale file ${file.name}: $deleted")
+            } else {
+                Log.d("DarQUpdate", "deleteStaleCache: Keeping active file ${file.name}")
             }
         }
     }
 
     private fun getLatestReleaseResponse(): GitHubReleaseResponse? {
         val service: GitHubService = retrofit.create(GitHubService::class.java)
+        Log.d("DarQUpdate", "getLatestReleaseResponse: Making GitHub API call to $BASE_URL")
         runCatching {
             service.getLatestRelease().execute().body()
         }.onSuccess {
+            Log.d("DarQUpdate", "getLatestReleaseResponse: API call success, body: $it")
             return it
         }.onFailure {
+            Log.e("DarQUpdate", "getLatestReleaseResponse: API call failed", it)
             return null
         }
         return null
