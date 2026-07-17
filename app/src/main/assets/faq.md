@@ -30,6 +30,17 @@ To switch to this fork:
 
 All future updates from this fork will install seamlessly as normal upgrades.
 
+### Why does upgrading from an older DarQ Reborn version (pre-v3.0) show an "incompatible package" error?
+
+Starting from v3.0, DarQ Reborn's package name changed from `com.kieronquinn.app.darq` to `com.mohitarora.darqreborn` to cleanly separate this fork from the archived upstream project and enable listing on FOSS repositories (F-Droid, IzzyOnDroid). Android treats these as two separate apps, so a one-time manual switch is needed:
+
+1. Export your settings using **Backup & Restore** inside the old app.
+2. Uninstall the old version.
+3. Install the new version.
+4. Import your backup from Step 1.
+
+All future updates from this point onwards will install as normal upgrades — no reinstall needed.
+
 ### How can I keep DarQ up to date? Is DarQ available on the Play Store?
 
 DarQ is not on the Play Store, as it uses hidden APIs, which Google does not like. DarQ is instead available on GitHub, and will automatically check for updates when launched. If you would like to check manually, use the GitHub link on the main page of DarQ, and follow the "Releases" link.

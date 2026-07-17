@@ -13,7 +13,7 @@ class TriggerReceiver: BroadcastReceiver() {
 
     companion object {
         private const val TAG = "TriggerReceiver"
-        const val ACTION_START_SERVICE = "com.kieronquinn.app.darq.ACTION_START_SERVICE"
+        const val ACTION_START_SERVICE = "com.mohitarora.darqreborn.ACTION_START_SERVICE"
     }
 
     override fun onReceive(context: Context?, intent: Intent?) {

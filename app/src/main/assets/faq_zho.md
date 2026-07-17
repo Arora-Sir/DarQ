@@ -30,6 +30,17 @@ DarQ 最初由 [Kieron Quinn](https://github.com/KieronQuinn) ([DarQ](https://gi
 
 此分支以后的所有更新都将直接作为正常升级无缝安装。
 
+### 为什么从旧版 DarQ Reborn（v3.0 之前）升级会提示"安装包无效"？
+
+从 v3.0 开始，DarQ Reborn 的包名从 `com.kieronquinn.app.darq` 更改为 `com.mohitarora.darqreborn`，以将本分支与已存档的上游项目明确区分，并支持上架 FOSS 应用仓库（如 F-Droid、IzzyOnDroid）。Android 将新旧包名视为两个不同的应用，因此需要执行一次性手动切换：
+
+1. 在旧版应用中转到**备份与恢复**并导出设置。
+2. 卸载旧版本。
+3. 安装新版本。
+4. 从第 1 步的备份中恢复设置。
+
+此后的所有 DarQ Reborn 更新均可直接作为正常升级安装，无需再次重装。
+
 ### 我怎么更新 DarQ？能在 Google Play 上下吗？
 
 DarQ 没上 Google Play，因为 DarQ 用了隐藏的 API，而 Google 并不喜欢这种做法。DarQ 可以在 GitHub 上下载，并且会在启动时自动检查更新。如果您想手动检查的话，请点击主页上的 GitHub 链接，然后点“Releases”。

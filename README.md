@@ -9,7 +9,15 @@ DarQ provides a per-app selectable force dark option for Android 10 and above.
 > This is a modded fork maintained by [Mohit Arora](https://github.com/Arora-Sir). The original repository by [KieronQuinn](https://github.com/KieronQuinn/DarQ) is archived.
 
 > [!IMPORTANT]
-> **Upgrading from the Official Release (v2.2.1 or older):** Due to a signature mismatch from the transition to this fork, you **must uninstall the official version first** before installing updates from this repository. Future updates from this fork will upgrade directly as normal.
+> **Migrating from DarQ (original) or older DarQ Reborn (pre-v3.0):**
+> The package name has changed from `com.kieronquinn.app.darq` to `com.mohitarora.darqreborn`. Android treats these as two separate apps, so a one-time manual switch is required:
+>
+> 1. Export your settings using **Backup & Restore** inside the old app.
+> 2. Uninstall the old version.
+> 3. Install this version.
+> 4. Import your backup from Step 1.
+>
+> All future DarQ Reborn updates (from this version onwards) will install as normal upgrades — no reinstall needed.
 
 It uses a root or [Shizuku](https://shizuku.rikka.app/) (ADB) service to apply the theme seamlessly and quickly, without needing an accessibility service.
 
@@ -47,13 +55,13 @@ See the [FAQ](https://github.com/Arora-Sir/DarQ-Reborn/blob/master/app/src/main/
 
 ### Automation & ADB Triggering (MacroDroid/Tasker)
 If you use automation apps (such as MacroDroid, Tasker, or Automate) and want to start DarQ's background service externally, you can send an explicit broadcast:
-* **Action**: `com.kieronquinn.app.darq.ACTION_START_SERVICE`
-* **Package**: `com.kieronquinn.app.darq`
+* **Action**: `com.mohitarora.darqreborn.ACTION_START_SERVICE`
+* **Package**: `com.mohitarora.darqreborn`
 
 Alternatively, you can trigger it via ADB shell:
 
 ```bash
-adb shell am broadcast -a com.kieronquinn.app.darq.ACTION_START_SERVICE -p com.kieronquinn.app.darq
+adb shell am broadcast -a com.mohitarora.darqreborn.ACTION_START_SERVICE -p com.mohitarora.darqreborn
 ```
 
 DarQ also provides an option to apply the system dark theme (as well as selectable force dark) only after sunset and before sunrise, protecting your eyes when it's most needed. 
