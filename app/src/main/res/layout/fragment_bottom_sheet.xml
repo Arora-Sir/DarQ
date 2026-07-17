@@ -22,7 +22,7 @@
         tools:text="Title"
         tools:textColor="@android:color/white" />
 
-    <androidx.core.widget.NestedScrollView
+    <com.kieronquinn.app.darq.ui.views.MaxHeightNestedScrollView
         android:id="@+id/bottom_sheet_content_container"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -39,7 +39,7 @@
             tools:text="Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nunc tempus gravida augue, vehicula fermentum lectus sodales sit amet. Pellentesque pulvinar semper lectus, ac elementum ex. Curabitur posuere id nunc sed malesuada. Pellentesque quis sollicitudin mauris. Morbi elit turpis, ultricies non."
             tools:textColor="@android:color/white" />
 
-    </androidx.core.widget.NestedScrollView>
+    </com.kieronquinn.app.darq.ui.views.MaxHeightNestedScrollView>
 
 
     <com.google.android.material.button.MaterialButton

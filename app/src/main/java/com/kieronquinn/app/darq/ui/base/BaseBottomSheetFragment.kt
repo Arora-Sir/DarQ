@@ -116,20 +116,21 @@ abstract class BaseBottomSheetFragment<T: ViewBinding>(private val inflate: (Lay
         return binding.root
     }
 
+    override fun onStart() {
+        super.onStart()
+        val dialog = dialog as? BottomSheetDialog ?: return
+        val sheet = dialog.findViewById<View>(com.google.android.material.R.id.design_bottom_sheet) ?: return
+        (sheet.parent as? View)?.backgroundTintList = ColorStateList.valueOf(monet.getBackgroundColor(requireContext()))
+        behavior = BottomSheetBehavior.from(sheet).apply {
+            isDraggable = cancelable
+            state = BottomSheetBehavior.STATE_EXPANDED
+            skipCollapsed = true
+            addBottomSheetCallback(bottomSheetCallback)
+        }
+    }
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        dialog?.setOnShowListener {
-            val currentView = this.view
-            if (currentView != null) {
-                (currentView.parent as? View)?.backgroundTintList = ColorStateList.valueOf(monet.getBackgroundColor(requireContext()))
-                behavior = (dialog as? BottomSheetDialog)?.behavior?.apply {
-                    isDraggable = cancelable
-                    state = BottomSheetBehavior.STATE_EXPANDED
-                    skipCollapsed = true
-                    addBottomSheetCallback(bottomSheetCallback)
-                }
-            }
-        }
         showBlurAnimation = ValueAnimator.ofFloat(0f, 1f).apply {
             duration = 250L
             addUpdateListener {
