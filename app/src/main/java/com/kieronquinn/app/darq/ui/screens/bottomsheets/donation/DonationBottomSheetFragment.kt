@@ -34,9 +34,9 @@ class DonationBottomSheetFragment : BaseBottomSheetFragment<FragmentBottomSheetD
             donationIcPaypal.imageTintList = accent
             donationCancel.setTextColor(accent)
 
-            val cardBackground = androidx.core.content.ContextCompat.getColor(requireContext(), R.color.bottom_sheet_card_background)
-            donationUpi.backgroundTintList = ColorStateList.valueOf(cardBackground)
-            donationPaypal.backgroundTintList = ColorStateList.valueOf(cardBackground)
+            val secondaryBackground = monet.getBackgroundColorSecondary(requireContext()) ?: monet.getBackgroundColor(requireContext())
+            donationUpi.backgroundTintList = ColorStateList.valueOf(secondaryBackground)
+            donationPaypal.backgroundTintList = ColorStateList.valueOf(secondaryBackground)
 
             ViewCompat.setOnApplyWindowInsetsListener(root) { v, insets ->
                 val bottomInset = insets.getInsets(WindowInsetsCompat.Type.navigationBars()).bottom
