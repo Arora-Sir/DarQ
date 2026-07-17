@@ -94,9 +94,26 @@ No. Apps are able to disable force dark in code, so Xposed is the only way to pr
 
 For the Xposed module to function correctly, you must configure both LSPosed and DarQ:
 
-1. **LSPosed Manager**: Check/enable the target applications in the **DarQ module scope** within the LSPosed Manager. This allows the module to hook into those applications.
-2. **DarQ App**: Select the same applications in DarQ's app picker (unless you have enabled **"Always use Force Dark"** in Advanced Options, which automatically enables it for all scoped apps).
-3. **System Framework**: Do **not** select "System Framework" in the LSPosed scope. DarQ only needs to hook individual application processes to enable Force Dark; hooking the system framework is unnecessary and can cause system UI overhead.
+1. **LSPosed Manager**: Add the target apps to DarQ's module scope. This gives the module permission to hook into those app processes.
+2. **DarQ App**: Select the same apps in DarQ's app picker to enable Force Dark on them. Alternatively, enable **"Always use Force Dark"** in **Advanced Options** to automatically apply Force Dark to every app in the LSPosed scope without any manual selection.
+3. **System Framework**: Do **not** select "System Framework" or "System UI" in the LSPosed scope. DarQ only needs to hook individual app processes - adding the system framework is unnecessary and can cause instability or system UI issues on some devices.
+
+### Why does DarQ have its own app picker if LSPosed scope already controls which apps are selected?
+
+They serve two different purposes.
+
+- **LSPosed scope** is a security boundary managed by LSPosed itself. It controls which apps the module is *allowed* to inject into. Think of it as a permission list.
+- **DarQ's app picker** is a user preference layer on top of that. It controls which of those permitted apps should *actually* have Force Dark applied.
+
+For example, you might add 20 apps to the LSPosed scope but only want Force Dark actively applied to 5 of them. The DarQ picker gives you that extra granularity without having to change the LSPosed scope every time.
+
+If you prefer not to manage two lists, enable **"Always use Force Dark"** in **Advanced Options**. This makes DarQ automatically apply Force Dark to every app in the LSPosed scope, so you only ever need to manage one list - the LSPosed scope.
+
+### Should I add System Framework or System UI to the LSPosed scope for DarQ?
+
+No. Only add the individual apps you want Force Dark to work on (for example, Amazon, LinkedIn, etc.). DarQ's Xposed module works by hooking inside each target app's own process to prevent that app from disabling Force Dark. It does not need access to the system framework at all.
+
+Adding System Framework or System UI to the scope is unnecessary and may cause system UI glitches or instability on some devices.
 
 ### Why does the status bar invert (have black icons) when force dark is enabled? Can it be fixed?
 

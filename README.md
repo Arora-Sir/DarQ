@@ -33,6 +33,18 @@ If your device is not rooted, you must set up **Shizuku** before running DarQ:
 > * **OPPO / OnePlus / Realme:** You must enable the **"Disable permission monitoring"** (or **"Disable system optimization"** in newer builds) setting in Developer Options to prevent the OS from blocking the connection.
 > * **Background Service Termination (OnePlus / Oppo / Xiaomi):** If you find that you have to manually open DarQ to make apps dark again after a while, the system has killed the background DarQ process. Go to **Advanced Options** in the app, enable **"Keep service running in background"**, and click **"Manage Notification"** to hide or minimize the status bar icon if desired.
 
+### Xposed / LSPosed Mode Setup
+
+If you are using the **Xposed / LSPosed** mode (to override apps that block Force Dark in code), the setup requires two steps:
+
+1. **LSPosed Manager -> DarQ module scope**: Add the apps you want Force Dark to work on. This gives DarQ permission to inject into those app processes.
+2. **DarQ app -> App picker**: Select the same apps to enable Force Dark on them, **or** enable **"Always use Force Dark"** in **Advanced Options** to skip this step and automatically apply Force Dark to everything in the LSPosed scope.
+
+> [!IMPORTANT]
+> **Do not add System Framework or System UI** to the LSPosed scope. DarQ works inside each individual app process and does not need system-level access. Adding System Framework is unnecessary and may cause system UI glitches or instability.
+
+See the [FAQ](https://github.com/Arora-Sir/DarQ-Reborn/blob/master/app/src/main/assets/faq.md#how-should-i-configure-the-lsposed--xposed-scope-for-darq) for more detail on the LSPosed scope configuration.
+
 ### Automation & ADB Triggering (MacroDroid/Tasker)
 If you use automation apps (such as MacroDroid, Tasker, or Automate) and want to start DarQ's background service externally, you can send an explicit broadcast:
 * **Action**: `com.kieronquinn.app.darq.ACTION_START_SERVICE`
