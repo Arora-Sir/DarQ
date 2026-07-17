@@ -120,7 +120,8 @@ abstract class BaseBottomSheetFragment<T: ViewBinding>(private val inflate: (Lay
         super.onStart()
         val dialog = dialog as? BottomSheetDialog ?: return
         val sheet = dialog.findViewById<View>(com.google.android.material.R.id.design_bottom_sheet) ?: return
-        (sheet.parent as? View)?.backgroundTintList = ColorStateList.valueOf(monet.getBackgroundColor(requireContext()))
+        val backgroundColor = androidx.core.content.ContextCompat.getColor(requireContext(), R.color.bottom_sheet_background)
+        (sheet.parent as? View)?.backgroundTintList = ColorStateList.valueOf(backgroundColor)
         behavior = BottomSheetBehavior.from(sheet).apply {
             isDraggable = cancelable
             state = BottomSheetBehavior.STATE_EXPANDED

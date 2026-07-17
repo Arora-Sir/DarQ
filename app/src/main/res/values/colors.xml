@@ -44,4 +44,7 @@
     <color name="icon_inside_14">#cd00ea</color>
     <color name="icon_inside_15">#03A9F4</color>
 
+    <color name="bottom_sheet_background">@android:color/white</color>
+    <color name="bottom_sheet_card_background">#F5F5F5</color>
+
 </resources>

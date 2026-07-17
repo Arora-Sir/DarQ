@@ -48,8 +48,8 @@ class SocialLinksBottomSheetFragment : BaseBottomSheetFragment<FragmentBottomShe
             socialIcReddit.imageTintList = accent
             socialLinksCancel.setTextColor(accent)
 
-            val secondaryBackground = monet.getBackgroundColorSecondary(requireContext()) ?: monet.getBackgroundColor(requireContext())
-            val backgroundTint = ColorStateList.valueOf(secondaryBackground)
+            val cardBackground = androidx.core.content.ContextCompat.getColor(requireContext(), R.color.bottom_sheet_card_background)
+            val backgroundTint = ColorStateList.valueOf(cardBackground)
             socialWebsite.backgroundTintList = backgroundTint
             socialGithubProfile.backgroundTintList = backgroundTint
             socialTwitter.backgroundTintList = backgroundTint
