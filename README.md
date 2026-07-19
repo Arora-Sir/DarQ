@@ -68,4 +68,26 @@ DarQ also provides an option to apply the system dark theme (as well as selectab
 
 Please read the Frequently Asked Questions sections in the app or [here](https://github.com/Arora-Sir/DarQ-Reborn/blob/master/app/src/main/assets/faq.md) for more information and some answers to questions.
 
-[Download from GitHub Releases](https://github.com/Arora-Sir/DarQ-Reborn/releases)
+## Troubleshooting & Bug Reporting
+
+If you encounter crashes or issues, sharing a logcat log is extremely helpful for diagnostics. Here is how to capture it:
+
+### Option A: On-Device (Using Shizuku + LogFox)
+
+1. Install an open-source log viewer like **LogFox** (available on [GitHub](https://github.com/F0x1d/LogFox)).
+2. Open LogFox and grant it Shizuku access.
+3. Start recording logs, launch DarQ Reborn to trigger the crash, and copy the captured logs from the notification pop-up.
+4. Share the copied crash log in your bug report or GitHub issue.
+
+### Option B: Via Computer (Using ADB)
+
+1. Connect your phone to your computer with **USB Debugging** enabled.
+2. Open a command prompt or terminal and run:
+
+   ```bash
+   adb logcat -d > logcat.txt
+   ```
+
+3. Share the generated `logcat.txt` file in your bug report or GitHub issue.
+
+[Download from GitHub Releases](https://github.com/Arora-Sir/DarQ-Reborn/releases)
