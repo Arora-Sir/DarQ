@@ -120,7 +120,7 @@ class DarqApplication : Application() {
                             if (Shizuku.checkSelfPermission() == PackageManager.PERMISSION_GRANTED) {
                                 connectionProvider.getService()
                             }
-                        } catch (e: Exception) {
+                        } catch (e: Throwable) {
                             Log.e("DarQA", "Failed to auto-bind to Shizuku service", e)
                         }
                     }
@@ -128,7 +128,14 @@ class DarqApplication : Application() {
             }
             Shizuku.addBinderReceivedListener(binderReceivedListener)
 
-            if (Shizuku.pingBinder() && Shizuku.checkSelfPermission() == PackageManager.PERMISSION_GRANTED) {
+            val isShizukuReady = try {
+                Shizuku.pingBinder() && Shizuku.checkSelfPermission() == PackageManager.PERMISSION_GRANTED
+            } catch (e: Throwable) {
+                Log.e("DarQA", "Failed to check Shizuku status on startup", e)
+                false
+            }
+
+            if (isShizukuReady) {
                 Log.d("DarQA", "Shizuku binder already active on Application startup. Binding service...")
                 GlobalScope.launch(Dispatchers.Main) {
                     try {
