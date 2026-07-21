@@ -2,6 +2,7 @@ package com.kieronquinn.app.darq.components.settings
 
 import com.kieronquinn.app.darq.model.settings.IPCSetting
 import com.kieronquinn.app.darq.model.settings.SettingsBackup
+import com.kieronquinn.app.darq.model.xposed.XposedSelfHooks
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.withContext
@@ -76,17 +77,18 @@ abstract class DarqSharedPreferences: BaseSharedPreferences() {
     var xposedInvertStatus by this.shared(KEY_XPOSED_INVERT_STATUS_BAR, DEFAULT_XPOSED_INVERT_STATUS_BAR)
 
     fun getIPCSettingForKey(key: String): IPCSetting? {
+        val xposed = XposedSelfHooks.isXposedModuleEnabled()
         return when(key){
-            KEY_ENABLED -> IPCSetting(enabled = enabled)
-            KEY_ALWAYS_FORCE_DARK -> IPCSetting(alwaysForceDark = alwaysForceDark)
-            KEY_OXYGEN_FORCE_DARK -> IPCSetting(oxygenForceDark = oxygenForceDark)
-            KEY_SEND_APP_CLOSES -> IPCSetting(sendAppCloses = sendAppCloses)
+            KEY_ENABLED -> IPCSetting(enabled = enabled, isXposedActive = xposed)
+            KEY_ALWAYS_FORCE_DARK -> IPCSetting(alwaysForceDark = alwaysForceDark, isXposedActive = xposed)
+            KEY_OXYGEN_FORCE_DARK -> IPCSetting(oxygenForceDark = oxygenForceDark, isXposedActive = xposed)
+            KEY_SEND_APP_CLOSES -> IPCSetting(sendAppCloses = sendAppCloses, isXposedActive = xposed)
             else -> null
         }
     }
 
     fun toIPCSetting(): IPCSetting {
-        return IPCSetting(enabled, oxygenForceDark, alwaysForceDark, sendAppCloses)
+        return IPCSetting(enabled, oxygenForceDark, alwaysForceDark, sendAppCloses, isXposedActive = XposedSelfHooks.isXposedModuleEnabled())
     }
 
     fun getSettingsBackup(): SettingsBackup {

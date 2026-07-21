@@ -9,9 +9,10 @@ data class IPCSetting(
     val oxygenForceDark: Boolean? = null,
     val alwaysForceDark: Boolean? = null,
     val sendAppCloses: Boolean? = null,
-    val packageChange: IPCPackageChange? = null
+    val packageChange: IPCPackageChange? = null,
+    val isXposedActive: Boolean? = null
 ): Parcelable {
     override fun toString(): String {
-        return "IPCSetting enabled=$enabled oxygenForceDark=$oxygenForceDark sendAppCloses=$sendAppCloses packageChange=[$packageChange]"
+        return "IPCSetting enabled=$enabled oxygenForceDark=$oxygenForceDark sendAppCloses=$sendAppCloses packageChange=[$packageChange] isXposedActive=$isXposedActive"
     }
 }

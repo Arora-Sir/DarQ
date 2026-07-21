@@ -49,6 +49,7 @@ class DarqService(private val serviceType: DarqServiceConnectionProvider.Service
     private var isEnabled = true
     private var isAlwaysForceDarkEnabled = false
     private var isOxygenForceDarkEnabled = false
+    private var isXposedActive = false
     private val appWhitelist = emptySet<String>().toMutableSet()
     private var tempAppList = emptyList<String>().toMutableList()
     private var currentApp = MutableStateFlow<String?>(null)
@@ -132,6 +133,9 @@ class DarqService(private val serviceType: DarqServiceConnectionProvider.Service
      *  is handled separately.
      */
     override fun setupSettings(ipcSetting: IPCSetting) {
+        if(ipcSetting.isXposedActive != null) {
+            isXposedActive = ipcSetting.isXposedActive
+        }
         if(ipcSetting.enabled != null) {
             isEnabled = ipcSetting.enabled
         }
@@ -153,6 +157,9 @@ class DarqService(private val serviceType: DarqServiceConnectionProvider.Service
      *  Only one of the fields should be non-null
      */
     override fun notifySettingsChange(ipcSetting: IPCSetting) {
+        if(ipcSetting.isXposedActive != null) {
+            isXposedActive = ipcSetting.isXposedActive
+        }
         when {
             ipcSetting.enabled != null -> {
                 isEnabled = ipcSetting.enabled
@@ -185,6 +192,7 @@ class DarqService(private val serviceType: DarqServiceConnectionProvider.Service
      *  command (for speed)
      */
     private fun setForceDarkEnabled(enabled: Boolean) {
+        if(isXposedActive) return
         val currentValue = SystemProperties[FORCE_DARK_PROP]?.toBoolean() ?: false
         if(currentValue == enabled) return
         SystemProperties[FORCE_DARK_PROP] = enabled.toString()
