@@ -53,16 +53,24 @@ If you are using the **Xposed / LSPosed** mode (to override apps that block Forc
 
 See the [FAQ](https://github.com/Arora-Sir/DarQ-Reborn/blob/master/app/src/main/assets/faq.md#how-should-i-configure-the-lsposed--xposed-scope-for-darq) for more detail on the LSPosed scope configuration.
 
-### Automation & ADB Triggering (MacroDroid/Tasker)
-If you use automation apps (such as MacroDroid, Tasker, or Automate) and want to start DarQ's background service externally, you can send an explicit broadcast:
+### Automation & ADB Triggering (MacroDroid/Tasker/Termux)
+If you use automation apps (such as MacroDroid, Tasker, or Automate) and want to start DarQ's background service externally, send a broadcast with the following details:
+
+* **Target**: `Broadcast` / `BroadcastReceiver`
 * **Action**: `com.mohitarora.darqreborn.ACTION_START_SERVICE`
 * **Package**: `com.mohitarora.darqreborn`
+* **Class**: `com.kieronquinn.app.darq.receivers.TriggerReceiver`
+* **Flags**: `32` (`FLAG_INCLUDE_STOPPED_PACKAGES`)
 
-Alternatively, you can trigger it via ADB shell:
+> [!TIP]
+> Specifying the explicit **Class** and **Flags: 32** ensures the broadcast successfully wakes up and triggers DarQ across all Android versions (Android 8.0+ through 14+) on any device, under all conditions (normal operation, background, or force-stopped).
+
+Alternatively, you can trigger it via ADB shell or Termux:
 
 ```bash
-adb shell am broadcast -a com.mohitarora.darqreborn.ACTION_START_SERVICE -p com.mohitarora.darqreborn
+adb shell am broadcast -a com.mohitarora.darqreborn.ACTION_START_SERVICE -n com.mohitarora.darqreborn/com.kieronquinn.app.darq.receivers.TriggerReceiver -f 32
 ```
+
 
 DarQ also provides an option to apply the system dark theme (as well as selectable force dark) only after sunset and before sunrise, protecting your eyes when it's most needed. 
 
