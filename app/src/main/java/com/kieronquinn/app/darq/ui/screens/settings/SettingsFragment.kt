@@ -44,14 +44,11 @@ class SettingsFragment : BaseSettingsFragment<FragmentSettingsBinding>(FragmentS
                 settings::oxygenForceDark,
                 visible = { viewModel.isOxygenForceDarkSupported() }
             ),
-            SettingsItem.SwitchSetting(
+            SettingsItem.Setting(
                 R.drawable.ic_day_night_auto_round,
                 getString(R.string.item_day_night_auto_title),
                 getString(R.string.item_day_night_auto_content),
-                settings::autoDarkTheme,
-                tapAction = { checked ->
-                    viewModel.onAutoDarkThemeCheckedChange(checked, sharedViewModel)
-                }
+                tapAction = viewModel::onAutoDarkOptionsClicked
             ),
             SettingsItem.Setting(
                 R.drawable.ic_advanced_round,
@@ -85,7 +82,7 @@ class SettingsFragment : BaseSettingsFragment<FragmentSettingsBinding>(FragmentS
                 tapAction = viewModel::onFaqClicked
             ),
             SettingsItem.Setting(
-                R.drawable.ic_restore_round,
+                R.drawable.ic_update,
                 getString(R.string.item_check_updates_manual_title),
                 getString(R.string.item_check_updates_manual_content),
                 tapAction = {

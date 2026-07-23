@@ -38,9 +38,17 @@
             android:id="@+id/action_settingsFragment_to_xposedSettingsFragment"
             app:destination="@id/xposedSettingsFragment" />
         <action
+            android:id="@+id/action_settingsFragment_to_settingsAutoDarkFragment"
+            app:destination="@id/settingsAutoDarkFragment" />
+        <action
             android:id="@+id/action_settingsFragment_to_backupRestoreBottomSheetFragment"
             app:destination="@id/backupRestoreBottomSheetFragment" />
     </fragment>
+    <fragment
+        android:id="@+id/settingsAutoDarkFragment"
+        android:name="com.kieronquinn.app.darq.ui.screens.settings.autodark.SettingsAutoDarkFragment"
+        android:label="@string/item_day_night_auto_title"
+        tools:layout="@layout/fragment_settings_auto_dark" />
     <fragment
         android:id="@+id/settingsAdvancedFragment"
         android:name="com.kieronquinn.app.darq.ui.screens.settings.advanced.SettingsAdvancedFragment"

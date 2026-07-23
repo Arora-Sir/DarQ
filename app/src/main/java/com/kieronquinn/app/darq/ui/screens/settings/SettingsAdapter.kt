@@ -173,16 +173,16 @@ class SettingsAdapter(context: Context, private var items: List<SettingsItem>): 
             itemSettingSwitchIcon.setImageDrawable(ColorDrawable(Color.TRANSPARENT))
         }
         itemSettingSwitchSwitch.setOnCheckedChangeListener(null)
-        itemSettingSwitchSwitch.isChecked = item.setting.get()
+        itemSettingSwitchSwitch.isChecked = item.getValue?.invoke() ?: item.setting?.get() ?: false
         itemSettingSwitchSwitch.setOnCheckedChangeListener { button, isChecked ->
             if(item.tapAction != null){
                 if(item.tapAction.invoke(isChecked)){
-                    item.setting.set(isChecked)
+                    item.setValue?.invoke(isChecked) ?: item.setting?.set(isChecked)
                 }else{
                     button.isChecked = !isChecked
                 }
             }else {
-                item.setting.set(isChecked)
+                item.setValue?.invoke(isChecked) ?: item.setting?.set(isChecked)
             }
         }
         root.setOnClickListener {
@@ -194,7 +194,7 @@ class SettingsAdapter(context: Context, private var items: List<SettingsItem>): 
     }
 
     fun notifySwitchSettings(){
-        items.forEachIndexed { index, settingsItem ->
+        visibleItems.forEachIndexed { index, settingsItem ->
             if(settingsItem is SettingsItem.SwitchSetting) {
                 notifyItemChanged(index)
             }

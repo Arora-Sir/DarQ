@@ -72,17 +72,24 @@ adb shell am broadcast -a com.mohitarora.darqreborn.ACTION_START_SERVICE -n com.
 ```
 
 
-DarQ also provides an option to apply the system dark theme (as well as selectable force dark) only after sunset and before sunrise, protecting your eyes when it's most needed. 
+### Auto Dark Theme & Scheduling
 
-Please read the Frequently Asked Questions sections in the app or [here](https://github.com/Arora-Sir/DarQ-Reborn/blob/master/app/src/main/assets/faq.md) for more information and some answers to questions.
+DarQ provides automated dark theme scheduling to protect your eyes when needed:
+
+* **Schedule Modes:**
+  * **Sunset to Sunrise:** Automatically switches dark theme at sunset and sunrise using location calculations or optional GPS positioning.
+  * **Custom Time Schedule:** Set custom start (Dark Mode ON) and end (Dark Mode OFF) times according to your routine.
+* **Schedule Targets:** Choose whether scheduling toggles **System & DarQ Dark Mode** simultaneously or **DarQ Force Dark Only** (per-app force dark without changing system dark mode).
+
+Please read the Frequently Asked Questions sections in the app or [here](https://github.com/Arora-Sir/DarQ-Reborn/blob/master/app/src/main/assets/faq.md) for more information and answers.
 
 ## Troubleshooting & Bug Reporting
 
 If you encounter crashes or issues, sharing a logcat log is extremely helpful for diagnostics. Here is how to capture it on-device:
 
-1. Install an open-source log viewer like **LogFox** (available on [GitHub](https://github.com/F0x1d/LogFox)).
+1. Install an open-source log viewer like [**LogFox**](https://github.com/F0x1d/LogFox).
 2. Open LogFox and grant it Shizuku access.
 3. Start recording logs, launch DarQ Reborn to trigger the crash, and copy the captured logs from the notification pop-up.
 4. Share the copied crash log in your bug report or GitHub issue.
 
-[Download from GitHub Releases](https://github.com/Arora-Sir/DarQ-Reborn/releases)
+[Download from GitHub Releases](https://github.com/Arora-Sir/DarQ-Reborn/releases)

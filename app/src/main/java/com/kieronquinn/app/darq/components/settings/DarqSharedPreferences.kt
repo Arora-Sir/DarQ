@@ -45,6 +45,18 @@ abstract class DarqSharedPreferences: BaseSharedPreferences() {
         private const val KEY_BOOT_WAIT_SHIZUKU = "boot_wait_shizuku"
         private const val DEFAULT_BOOT_WAIT_SHIZUKU = true
 
+        private const val KEY_AUTO_DARK_SCHEDULE_MODE = "auto_dark_schedule_mode"
+        private const val DEFAULT_AUTO_DARK_SCHEDULE_MODE = 0 // 0 = Off, 1 = Sunset/Sunrise, 2 = Custom Time
+
+        private const val KEY_AUTO_DARK_TARGET_MODE = "auto_dark_target_mode"
+        private const val DEFAULT_AUTO_DARK_TARGET_MODE = 1 // 0 = System Dark Mode, 1 = DarQ Force Dark Only
+
+        private const val KEY_AUTO_DARK_START_TIME = "auto_dark_start_time"
+        private const val DEFAULT_AUTO_DARK_START_TIME = 1200 // 8:00 PM (1200 mins from midnight)
+
+        private const val KEY_AUTO_DARK_END_TIME = "auto_dark_end_time"
+        private const val DEFAULT_AUTO_DARK_END_TIME = 420 // 7:00 AM (420 mins from midnight)
+
         private const val KEY_XPOSED_AGGRESSIVE_DARK = "xposed_aggressive_dark"
         const val DEFAULT_XPOSED_AGGRESSIVE_DARK = true
 
@@ -60,7 +72,6 @@ abstract class DarqSharedPreferences: BaseSharedPreferences() {
     abstract val changed: Flow<IPCSetting>
 
     var enabled by this.shared(KEY_ENABLED, DEFAULT_ENABLED)
-    var autoDarkTheme by this.shared(KEY_AUTO_DARK_THEME, DEFAULT_AUTO_DARK_THEME)
     var sendAppCloses by this.shared(KEY_SEND_APP_CLOSES, DEFAULT_SEND_APP_CLOSES)
     var oxygenForceDark by this.shared(KEY_OXYGEN_FORCE_DARK, DEFAULT_OXYGEN_FORCE_DARK)
     var alwaysForceDark by this.shared(KEY_ALWAYS_FORCE_DARK, DEFAULT_ALWAYS_FORCE_DARK)
@@ -70,6 +81,25 @@ abstract class DarqSharedPreferences: BaseSharedPreferences() {
     var developerOptions by this.shared(KEY_DEVELOPER_OPTIONS, DEFAULT_DEVELOPER_OPTIONS)
     var persistentService by this.shared(KEY_PERSISTENT_SERVICE, DEFAULT_PERSISTENT_SERVICE)
     var bootWaitShizuku by this.shared(KEY_BOOT_WAIT_SHIZUKU, DEFAULT_BOOT_WAIT_SHIZUKU)
+    var autoDarkScheduleMode by this.shared(KEY_AUTO_DARK_SCHEDULE_MODE, DEFAULT_AUTO_DARK_SCHEDULE_MODE)
+    var autoDarkTheme: Boolean
+        get() = autoDarkScheduleMode != 0
+        set(value) {
+            if (!value) {
+                autoDarkScheduleMode = 0
+            } else if (autoDarkScheduleMode == 0) {
+                autoDarkScheduleMode = 2
+            }
+        }
+    var autoDarkTargetMode by this.shared(KEY_AUTO_DARK_TARGET_MODE, DEFAULT_AUTO_DARK_TARGET_MODE)
+    var isDarqTargetOnly: Boolean
+        get() = autoDarkTargetMode == 1
+        set(value) { autoDarkTargetMode = if (value) 1 else 0 }
+    var isCustomSchedule: Boolean
+        get() = autoDarkScheduleMode == 2
+        set(value) { autoDarkScheduleMode = if (value) 2 else 1 }
+    var autoDarkStartTime by this.shared(KEY_AUTO_DARK_START_TIME, DEFAULT_AUTO_DARK_START_TIME)
+    var autoDarkEndTime by this.shared(KEY_AUTO_DARK_END_TIME, DEFAULT_AUTO_DARK_END_TIME)
     var monetColor by this.shared(KEY_UI_MONET_COLOR, Integer.MAX_VALUE)
     var enabledApps by this.sharedJSONArray(KEY_ENABLED_APPS)
 
@@ -107,6 +137,10 @@ abstract class DarqSharedPreferences: BaseSharedPreferences() {
             checkForPrereleases = this.checkForPrereleases,
             persistentService = this.persistentService,
             bootWaitShizuku = this.bootWaitShizuku,
+            autoDarkScheduleMode = this.autoDarkScheduleMode,
+            autoDarkTargetMode = this.autoDarkTargetMode,
+            autoDarkStartTime = this.autoDarkStartTime,
+            autoDarkEndTime = this.autoDarkEndTime,
             enabledApps = this.enabledApps.toList()
         )
     }
@@ -130,6 +164,10 @@ abstract class DarqSharedPreferences: BaseSharedPreferences() {
         checkForPrereleases = settingsBackup.checkForPrereleases
         persistentService = settingsBackup.persistentService
         bootWaitShizuku = settingsBackup.bootWaitShizuku
+        autoDarkScheduleMode = settingsBackup.autoDarkScheduleMode
+        autoDarkTargetMode = settingsBackup.autoDarkTargetMode
+        autoDarkStartTime = settingsBackup.autoDarkStartTime
+        autoDarkEndTime = settingsBackup.autoDarkEndTime
         enabledApps = settingsBackup.enabledApps.toTypedArray()
         return@withContext (useLocation && autoDarkTheme) && !currentUseLocation
     }

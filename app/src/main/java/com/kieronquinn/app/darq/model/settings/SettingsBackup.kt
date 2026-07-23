@@ -16,5 +16,9 @@ data class SettingsBackup(
     val checkForPrereleases: Boolean = false,
     val persistentService: Boolean = false,
     val bootWaitShizuku: Boolean = true,
+    val autoDarkScheduleMode: Int = 0,
+    val autoDarkTargetMode: Int = 0,
+    val autoDarkStartTime: Int = 1200,
+    val autoDarkEndTime: Int = 420,
     val enabledApps: List<String>
 )

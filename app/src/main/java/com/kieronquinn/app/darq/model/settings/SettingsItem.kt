@@ -17,7 +17,9 @@ sealed class SettingsItem constructor(open val itemType: SettingsItemType, open 
         @DrawableRes val icon: Int,
         val title: String,
         var content: CharSequence? = null,
-        val setting: KMutableProperty0<Boolean>,
+        val setting: KMutableProperty0<Boolean>? = null,
+        val getValue: (() -> Boolean)? = null,
+        val setValue: ((Boolean) -> Unit)? = null,
         override var centerIconVertically: Boolean = true,
         override var visible: () -> Boolean = {true},
         val tapAction: ((Boolean) -> Boolean)? = null

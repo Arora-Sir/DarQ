@@ -12,6 +12,7 @@ import com.kieronquinn.app.darq.components.settings.DarqSharedPreferences
 import com.kieronquinn.app.darq.model.location.LatLng
 import com.kieronquinn.app.darq.providers.DarqServiceConnectionProvider
 import com.kieronquinn.app.darq.ui.activities.DarqActivity
+import com.kieronquinn.app.darq.utils.AutoDarkUtils
 import com.kieronquinn.app.darq.utils.TimeZoneUtils
 import com.kieronquinn.app.darq.work.DarqSunriseSunsetWork
 import kotlinx.coroutines.Dispatchers
@@ -84,13 +85,31 @@ class DarqAutoDarkForegroundService: LifecycleService() {
         }
 
         lifecycleScope.launchWhenCreated {
-            if(!justReschedule) {
-                val enableDark = intent?.getBooleanExtra(KEY_ENABLE_DARK, false) ?: false
-                setDarkModeEnabled(enableDark)
-            }
-            val nextTriggerTimes = getNextTriggerTimes()
-            if(nextTriggerTimes != null) {
-                cancelAndScheduleWork(nextTriggerTimes)
+            when (settings.autoDarkScheduleMode) {
+                0 -> {
+                    // Off mode: cancel any scheduled jobs
+                    workManager.cancelAllWorkByTag(DarqSunriseSunsetWork.TAG_SUNSET)
+                    workManager.cancelAllWorkByTag(DarqSunriseSunsetWork.TAG_SUNRISE)
+                }
+                2 -> {
+                    // Custom Schedule Mode
+                    if(!justReschedule) {
+                        val isDark = AutoDarkUtils.isCustomScheduleDark(settings.autoDarkStartTime, settings.autoDarkEndTime)
+                        setDarkModeEnabled(isDark)
+                    }
+                    cancelAndScheduleCustomWork()
+                }
+                else -> {
+                    // Sunset/Sunrise Mode (mode 1)
+                    if(!justReschedule) {
+                        val enableDark = intent?.getBooleanExtra(KEY_ENABLE_DARK, false) ?: false
+                        setDarkModeEnabled(enableDark)
+                    }
+                    val nextTriggerTimes = getNextTriggerTimes()
+                    if(nextTriggerTimes != null) {
+                        cancelAndScheduleWork(nextTriggerTimes)
+                    }
+                }
             }
             stopForeground(true)
             stopSelf()
@@ -100,11 +119,15 @@ class DarqAutoDarkForegroundService: LifecycleService() {
     }
 
     private suspend fun setDarkModeEnabled(enabled: Boolean) = withContext(Dispatchers.IO) {
-        val service = serviceProvider.getService()
-        if(service is DarqServiceConnectionProvider.ServiceResult.Success){
-            service.service.setNightMode(enabled)
-        }else{
-            showFailedNotification()
+        if (settings.autoDarkTargetMode == 1) {
+            settings.enabled = enabled
+        } else {
+            val service = serviceProvider.getService()
+            if (service is DarqServiceConnectionProvider.ServiceResult.Success) {
+                service.service.setNightMode(enabled)
+            } else {
+                showFailedNotification()
+            }
         }
     }
 
@@ -124,6 +147,25 @@ class DarqAutoDarkForegroundService: LifecycleService() {
      */
     private fun getTimezoneLocation(): LatLng? {
         return TimeZoneUtils.getLatLngForTimezone(this, TimeZone.getDefault())
+    }
+
+    private fun cancelAndScheduleCustomWork() {
+        workManager.cancelAllWorkByTag(DarqSunriseSunsetWork.TAG_SUNSET)
+        workManager.cancelAllWorkByTag(DarqSunriseSunsetWork.TAG_SUNRISE)
+        if(settings.autoDarkTheme) {
+            val sunsetDelay = com.kieronquinn.app.darq.utils.AutoDarkUtils.calculateNextDelayMillis(settings.autoDarkStartTime)
+            val sunriseDelay = com.kieronquinn.app.darq.utils.AutoDarkUtils.calculateNextDelayMillis(settings.autoDarkEndTime)
+
+            val sunsetWork = OneTimeWorkRequestBuilder<DarqSunriseSunsetWork>()
+                .setInitialDelay(sunsetDelay, TimeUnit.MILLISECONDS)
+                .addTag(DarqSunriseSunsetWork.TAG_SUNSET).build()
+            workManager.enqueue(sunsetWork)
+
+            val sunriseWork = OneTimeWorkRequestBuilder<DarqSunriseSunsetWork>()
+                .setInitialDelay(sunriseDelay, TimeUnit.MILLISECONDS)
+                .addTag(DarqSunriseSunsetWork.TAG_SUNRISE).build()
+            workManager.enqueue(sunriseWork)
+        }
     }
 
     /**

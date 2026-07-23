@@ -27,6 +27,7 @@ abstract class SettingsViewModel: ViewModel() {
     abstract fun onAppWhitelistClicked()
     abstract fun onDeveloperOptionsClicked()
     abstract fun onAutoDarkThemeCheckedChange(checked: Boolean, sharedViewModel: ContainerSharedViewModel): Boolean
+    abstract fun onAutoDarkOptionsClicked()
     abstract fun onFaqClicked()
     abstract fun onAboutTripleTapped()
     abstract fun onOssLicencesClicked()
@@ -47,6 +48,12 @@ class SettingsViewModelImpl(
     override fun onAdvancedOptionsClicked() {
         viewModelScope.launch {
             navigation.navigate(SettingsFragmentDirections.actionSettingsFragmentToSettingsAdvancedFragment())
+        }
+    }
+
+    override fun onAutoDarkOptionsClicked() {
+        viewModelScope.launch {
+            navigation.navigate(SettingsFragmentDirections.actionSettingsFragmentToSettingsAutoDarkFragment())
         }
     }
 
