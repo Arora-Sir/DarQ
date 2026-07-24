@@ -137,7 +137,7 @@ abstract class DarqSharedPreferences: BaseSharedPreferences() {
     fun toIPCSetting(): IPCSetting {
         return IPCSetting(
             enabled = enabled,
-            autoDarkManagedEnabled = autoDarkManagedEnabled,
+            autoDarkManagedEnabled = if (autoDarkScheduleMode == 0) true else autoDarkManagedEnabled,
             oxygenForceDark = oxygenForceDark,
             alwaysForceDark = alwaysForceDark,
             sendAppCloses = sendAppCloses,

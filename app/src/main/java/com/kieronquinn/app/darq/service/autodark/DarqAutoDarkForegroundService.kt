@@ -153,6 +153,9 @@ class DarqAutoDarkForegroundService: LifecycleService() {
             } else {
                 showFailedNotification()
             }
+        } else {
+            // Target Mode 1 ("DarQ Force Dark Only") - mark as managed so restorePreAutoDarkState tracks active schedule
+            settings.autoDarkHasManaged = true
         }
 
         // Write ONLY to autoDarkManagedEnabled - the user's settings.enabled is untouched
@@ -173,35 +176,33 @@ class DarqAutoDarkForegroundService: LifecycleService() {
      *  Restores the pre-auto-dark state when Auto Dark Schedule is disabled by the user.
      *  - For System & DarQ mode: restores the system night mode to what it was before Auto Dark
      *    first activated.
-     *  - Always: clears autoDarkManagedEnabled (sets to true = no longer blocking) and sends
-     *    the IPC update so DarqService immediately re-enables force dark for the foreground app.
+     *  - Always: clears autoDarkManagedEnabled (sets to true = no longer blocking) unconditionally,
+     *    and sends the IPC update so DarqService immediately re-enables force dark for the foreground app.
      */
     private suspend fun restorePreAutoDarkState() = withContext(Dispatchers.IO) {
-        if (!settings.autoDarkHasManaged) return@withContext
+        // ALWAYS reset autoDarkManagedEnabled = true unconditionally so force dark is NEVER left blocked when schedule is OFF
+        settings.autoDarkManagedEnabled = true
 
         val serviceResult = serviceProvider.getService()
         val isServiceConnected = serviceResult is DarqServiceConnectionProvider.ServiceResult.Success
 
         if (isServiceConnected) {
             val svc = (serviceResult as DarqServiceConnectionProvider.ServiceResult.Success).service
-            // Restore system night mode for System & DarQ mode
-            if (settings.autoDarkTargetMode == 0) {
+            // Restore system night mode for System & DarQ mode if a pre-state was saved
+            if (settings.autoDarkTargetMode == 0 && settings.autoDarkHasManaged) {
                 svc.setNightMode(settings.preAutoDarkSystemNightMode)
             }
-            // Clear the Auto Dark blocking flag so force dark resumes immediately
-            settings.autoDarkManagedEnabled = true
             // Reset tracking flags
             settings.autoDarkHasManaged = false
             settings.preAutoDarkSystemNightMode = false
-            // Notify DarqService to re-evaluate foreground app and restore force dark
+            // Notify DarqService to clear isAutoDarkBlocking and re-evaluate foreground app
             val isXposed = XposedSelfHooks.isXposedModuleEnabled()
             svc.notifySettingsChange(IPCSetting(
                 autoDarkManagedEnabled = true,
                 isXposedActive = isXposed
             ))
         } else {
-            // Service not connected - still clear the pref so it doesn't block on next reconnect
-            settings.autoDarkManagedEnabled = true
+            // Service not connected - still clear tracking flags so it doesn't block on next reconnect
             settings.autoDarkHasManaged = false
             settings.preAutoDarkSystemNightMode = false
         }
