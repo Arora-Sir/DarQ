@@ -205,6 +205,10 @@ class DarqService(private val serviceType: DarqServiceConnectionProvider.Service
                 with(ipcSetting.packageChange){
                     if(enabled) appWhitelist.add(packageName)
                     else appWhitelist.remove(packageName)
+                    if (packageName == currentApp.value) {
+                        val shouldForceDark = isAlwaysForceDarkEnabled || (isEnabled && !isAutoDarkBlocking && enabled)
+                        setForceDarkEnabled(shouldForceDark)
+                    }
                 }
             }
         }
