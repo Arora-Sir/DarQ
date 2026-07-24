@@ -79,7 +79,9 @@ DarQ provides automated dark theme scheduling to protect your eyes when needed:
 * **Schedule Modes:**
   * **Sunset to Sunrise:** Automatically switches dark theme at sunset and sunrise using location calculations or optional GPS positioning.
   * **Custom Time Schedule:** Set custom start (Dark Mode ON) and end (Dark Mode OFF) times according to your routine.
-* **Schedule Targets:** Choose whether scheduling toggles **System & DarQ Dark Mode** simultaneously or **DarQ Force Dark Only** (per-app force dark without changing system dark mode).
+* **Schedule Targets:**
+  * **System & DarQ Dark Mode:** Toggles Android System Dark Mode and DarQ Per-App Force Dark simultaneously. Currently open apps switch instantly when the boundary crosses because Android OS broadcasts system-wide `uiMode` configuration changes.
+  * **DarQ Force Dark Only:** Toggles per-app force dark without altering system dark mode. The updated rendering mode applies when target apps are next launched or reopened (this prevents DarQ from force-closing active apps or interrupting unsaved work in open sessions).
 
 Please read the Frequently Asked Questions sections in the app or [here](https://github.com/Arora-Sir/DarQ-Reborn/blob/master/app/src/main/assets/faq.md) for more information and answers.
 

@@ -10,6 +10,8 @@ import androidx.work.WorkManager
 import com.kieronquinn.app.darq.R
 import com.kieronquinn.app.darq.components.settings.DarqSharedPreferences
 import com.kieronquinn.app.darq.model.location.LatLng
+import com.kieronquinn.app.darq.model.settings.IPCSetting
+import com.kieronquinn.app.darq.model.xposed.XposedSelfHooks
 import com.kieronquinn.app.darq.providers.DarqServiceConnectionProvider
 import com.kieronquinn.app.darq.ui.activities.DarqActivity
 import com.kieronquinn.app.darq.utils.AutoDarkUtils
@@ -29,10 +31,18 @@ class DarqAutoDarkForegroundService: LifecycleService() {
         private const val NOTIFICATION_ID_AUTO_DARK = 1003
         const val KEY_ENABLE_DARK = "enable_dark"
         const val KEY_JUST_RESCHEDULE = "just_reschedule"
+        private const val REQUEST_CODE_CUSTOM_START = 2001
+        private const val REQUEST_CODE_CUSTOM_END = 2002
+        private const val REQUEST_CODE_SUNSET = 2003
+        private const val REQUEST_CODE_SUNRISE = 2004
     }
 
     private val notificationManager by lazy {
         getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+    }
+
+    private val alarmManager by lazy {
+        getSystemService(Context.ALARM_SERVICE) as AlarmManager
     }
 
     private val launchIntent by lazy {
@@ -87,21 +97,20 @@ class DarqAutoDarkForegroundService: LifecycleService() {
         lifecycleScope.launchWhenCreated {
             when (settings.autoDarkScheduleMode) {
                 0 -> {
-                    // Off mode: cancel any scheduled jobs
+                    // Off mode: cancel any scheduled jobs & alarms
+                    cancelAllScheduledAlarms()
                     workManager.cancelAllWorkByTag(DarqSunriseSunsetWork.TAG_SUNSET)
                     workManager.cancelAllWorkByTag(DarqSunriseSunsetWork.TAG_SUNRISE)
                 }
                 2 -> {
-                    // Custom Schedule Mode
-                    if(!justReschedule) {
-                        val isDark = AutoDarkUtils.isCustomScheduleDark(settings.autoDarkStartTime, settings.autoDarkEndTime)
-                        setDarkModeEnabled(isDark)
-                    }
+                    // Custom Schedule Mode: always evaluate state for current time
+                    val isDark = AutoDarkUtils.isCustomScheduleDark(settings.autoDarkStartTime, settings.autoDarkEndTime)
+                    setDarkModeEnabled(isDark)
                     cancelAndScheduleCustomWork()
                 }
                 else -> {
                     // Sunset/Sunrise Mode (mode 1)
-                    if(!justReschedule) {
+                    if(!justReschedule || intent?.hasExtra(KEY_ENABLE_DARK) == true) {
                         val enableDark = intent?.getBooleanExtra(KEY_ENABLE_DARK, false) ?: false
                         setDarkModeEnabled(enableDark)
                     }
@@ -119,15 +128,24 @@ class DarqAutoDarkForegroundService: LifecycleService() {
     }
 
     private suspend fun setDarkModeEnabled(enabled: Boolean) = withContext(Dispatchers.IO) {
-        if (settings.autoDarkTargetMode == 1) {
-            settings.enabled = enabled
-        } else {
-            val service = serviceProvider.getService()
-            if (service is DarqServiceConnectionProvider.ServiceResult.Success) {
-                service.service.setNightMode(enabled)
+        val serviceResult = serviceProvider.getService()
+        val isServiceConnected = serviceResult is DarqServiceConnectionProvider.ServiceResult.Success
+
+        if (settings.autoDarkTargetMode == 0) {
+            if (isServiceConnected) {
+                (serviceResult as DarqServiceConnectionProvider.ServiceResult.Success).service.setNightMode(enabled)
             } else {
                 showFailedNotification()
             }
+        }
+
+        settings.enabled = enabled
+        if (isServiceConnected) {
+            val ipcService = (serviceResult as DarqServiceConnectionProvider.ServiceResult.Success).service
+            val isXposed = XposedSelfHooks.isXposedModuleEnabled()
+            ipcService.notifySettingsChange(IPCSetting(enabled = enabled, isXposedActive = isXposed))
+        } else if (settings.autoDarkTargetMode == 1) {
+            showFailedNotification()
         }
     }
 
@@ -149,12 +167,58 @@ class DarqAutoDarkForegroundService: LifecycleService() {
         return TimeZoneUtils.getLatLngForTimezone(this, TimeZone.getDefault())
     }
 
+    private fun cancelAllScheduledAlarms() {
+        val intent = Intent(this, com.kieronquinn.app.darq.receivers.DarqAlarmReceiver::class.java)
+        listOf(REQUEST_CODE_CUSTOM_START, REQUEST_CODE_CUSTOM_END, REQUEST_CODE_SUNSET, REQUEST_CODE_SUNRISE).forEach { code ->
+            val pendingIntent = PendingIntent.getBroadcast(this, code, intent, PendingIntent.FLAG_NO_CREATE or PendingIntent.FLAG_IMMUTABLE)
+            if (pendingIntent != null) {
+                alarmManager.cancel(pendingIntent)
+                pendingIntent.cancel()
+            }
+        }
+    }
+
     private fun cancelAndScheduleCustomWork() {
         workManager.cancelAllWorkByTag(DarqSunriseSunsetWork.TAG_SUNSET)
         workManager.cancelAllWorkByTag(DarqSunriseSunsetWork.TAG_SUNRISE)
+
+        val startIntent = Intent(this, com.kieronquinn.app.darq.receivers.DarqAlarmReceiver::class.java).apply {
+            putExtra(KEY_ENABLE_DARK, true)
+        }
+        val startPendingIntent = PendingIntent.getBroadcast(
+            this,
+            REQUEST_CODE_CUSTOM_START,
+            startIntent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+
+        val endIntent = Intent(this, com.kieronquinn.app.darq.receivers.DarqAlarmReceiver::class.java).apply {
+            putExtra(KEY_ENABLE_DARK, false)
+        }
+        val endPendingIntent = PendingIntent.getBroadcast(
+            this,
+            REQUEST_CODE_CUSTOM_END,
+            endIntent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+
+        alarmManager.cancel(startPendingIntent)
+        alarmManager.cancel(endPendingIntent)
+
         if(settings.autoDarkTheme) {
             val sunsetDelay = com.kieronquinn.app.darq.utils.AutoDarkUtils.calculateNextDelayMillis(settings.autoDarkStartTime)
             val sunriseDelay = com.kieronquinn.app.darq.utils.AutoDarkUtils.calculateNextDelayMillis(settings.autoDarkEndTime)
+
+            val startTriggerTime = System.currentTimeMillis() + sunsetDelay
+            val endTriggerTime = System.currentTimeMillis() + sunriseDelay
+
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
+                alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, startTriggerTime, startPendingIntent)
+                alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, endTriggerTime, endPendingIntent)
+            } else {
+                alarmManager.setExact(AlarmManager.RTC_WAKEUP, startTriggerTime, startPendingIntent)
+                alarmManager.setExact(AlarmManager.RTC_WAKEUP, endTriggerTime, endPendingIntent)
+            }
 
             val sunsetWork = OneTimeWorkRequestBuilder<DarqSunriseSunsetWork>()
                 .setInitialDelay(sunsetDelay, TimeUnit.MILLISECONDS)
@@ -177,18 +241,53 @@ class DarqAutoDarkForegroundService: LifecycleService() {
     private fun cancelAndScheduleWork(sunTimes: SunTimes){
         workManager.cancelAllWorkByTag(DarqSunriseSunsetWork.TAG_SUNSET)
         workManager.cancelAllWorkByTag(DarqSunriseSunsetWork.TAG_SUNRISE)
+
+        val sunsetIntent = Intent(this, com.kieronquinn.app.darq.receivers.DarqAlarmReceiver::class.java).apply {
+            putExtra(KEY_ENABLE_DARK, true)
+        }
+        val sunsetPendingIntent = PendingIntent.getBroadcast(
+            this,
+            REQUEST_CODE_SUNSET,
+            sunsetIntent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+
+        val sunriseIntent = Intent(this, com.kieronquinn.app.darq.receivers.DarqAlarmReceiver::class.java).apply {
+            putExtra(KEY_ENABLE_DARK, false)
+        }
+        val sunrisePendingIntent = PendingIntent.getBroadcast(
+            this,
+            REQUEST_CODE_SUNRISE,
+            sunriseIntent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+
+        alarmManager.cancel(sunsetPendingIntent)
+        alarmManager.cancel(sunrisePendingIntent)
+
         if(settings.autoDarkTheme) {
             val now = System.currentTimeMillis()
             val sunriseTime = sunTimes.rise?.time
             val sunsetTime = sunTimes.set?.time
-            if (sunriseTime != null) {
+
+            if (sunriseTime != null && sunriseTime > now) {
+                if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
+                    alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, sunriseTime, sunrisePendingIntent)
+                } else {
+                    alarmManager.setExact(AlarmManager.RTC_WAKEUP, sunriseTime, sunrisePendingIntent)
+                }
                 val sunriseDelay = sunriseTime - now
                 val sunriseWork = OneTimeWorkRequestBuilder<DarqSunriseSunsetWork>()
                     .setInitialDelay(sunriseDelay, TimeUnit.MILLISECONDS)
                     .addTag(DarqSunriseSunsetWork.TAG_SUNRISE).build()
                 workManager.enqueue(sunriseWork)
             }
-            if (sunsetTime != null) {
+            if (sunsetTime != null && sunsetTime > now) {
+                if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
+                    alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, sunsetTime, sunsetPendingIntent)
+                } else {
+                    alarmManager.setExact(AlarmManager.RTC_WAKEUP, sunsetTime, sunsetPendingIntent)
+                }
                 val sunsetDelay = sunsetTime - now
                 val sunsetWork = OneTimeWorkRequestBuilder<DarqSunriseSunsetWork>()
                     .setInitialDelay(sunsetDelay, TimeUnit.MILLISECONDS)

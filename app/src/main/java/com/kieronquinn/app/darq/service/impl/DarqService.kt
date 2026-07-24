@@ -166,7 +166,19 @@ class DarqService(private val serviceType: DarqServiceConnectionProvider.Service
                 if(!isEnabled) {
                     setForceDarkEnabled(false)
                 }else{
-                    setForceDarkEnabled(isAlwaysForceDarkEnabled)
+                    val foregroundApp = try {
+                        activityManager.runningAppProcesses
+                            ?.firstOrNull { it.importance == android.app.ActivityManager.RunningAppProcessInfo.IMPORTANCE_FOREGROUND }
+                            ?.processName?.let { if (it.contains(":")) it.substring(0, it.indexOf(":")) else it }
+                    } catch (e: Exception) {
+                        null
+                    }
+                    val currentOrForeground = foregroundApp ?: currentApp.value
+                    if (foregroundApp != null) {
+                        currentApp.tryEmit(foregroundApp)
+                    }
+                    val shouldForceDark = isAlwaysForceDarkEnabled || (currentOrForeground != null && appWhitelist.contains(currentOrForeground))
+                    setForceDarkEnabled(shouldForceDark)
                 }
             }
             ipcSetting.alwaysForceDark != null -> {
