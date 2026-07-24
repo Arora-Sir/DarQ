@@ -80,11 +80,14 @@ The two Auto Dark schedule targets use different underlying Android system mecha
 - **System & DarQ Dark Mode**: Calls Android's `UiModeManager.setNightMode()`. The Android OS system framework broadcasts a system-wide `uiMode` configuration change to all running apps, which automatically recreates active app windows in real-time.
 - **DarQ Force Dark Only**: Updates the hardware graphics renderer property (`debug.hwui.force_dark`). Android's rendering engine only reads this property when an app process or window context is initialized. Because Android OS does not send any notification when renderer properties change, DarQ deliberately refrains from force-closing your open apps to prevent data loss. The updated rendering mode takes effect when the target app is next launched or reopened.
 
-### What happens to per-app force dark if I disable the Auto Dark Schedule while in a light period?
+### What happens when I enable or disable the Auto Dark Schedule?
 
-Force dark immediately resumes normal operation. DarQ keeps your **Enable DarQ** master toggle and the **Auto Dark Schedule** state completely separate. Turning off the schedule (or having it in a light period) never permanently disables the **Enable DarQ** setting. The moment you turn off the Auto Dark Schedule, DarQ re-evaluates the currently open app and re-applies force dark according to your per-app selections, just as if the schedule had never been active.
+DarQ immediately re-evaluates all schedule rules and conditions the moment you toggle the Auto Dark Schedule:
 
-For **System & DarQ Mode**, the system night mode is also restored to whatever it was before Auto Dark first activated.
+- **When turning OFF Auto Dark Schedule**: Force dark immediately resumes normal operation based on your manual **Enable DarQ** master toggle and per-app whitelist. For **System & DarQ Mode**, system night mode is also restored to its pre-schedule state.
+- **When turning ON Auto Dark Schedule**: DarQ instantly checks the current time against your schedule (or location-based sunset/sunrise times). If the current time falls inside the light period (even if custom times were set previously), DarQ immediately switches to light mode. If it falls inside the dark period, dark mode is applied.
+
+Your manual **Enable DarQ** toggle and per-app whitelist choices are never permanently modified or lost when using the schedule.
 
 ### Why does DarQ/force dark need the system dark theme to be enabled?
 

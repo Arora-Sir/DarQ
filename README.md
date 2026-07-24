@@ -84,7 +84,10 @@ DarQ provides automated dark theme scheduling to protect your eyes when needed:
   * **DarQ Force Dark Only:** Toggles per-app force dark without altering system dark mode. The updated rendering mode applies when target apps are next launched or reopened (this prevents DarQ from force-closing active apps or interrupting unsaved work in open sessions).
 
 > [!NOTE]
-> Disabling Auto Dark Schedule at any time (including during a light period) immediately restores full DarQ per-app force dark functionality. Your manual **Enable DarQ** toggle is never permanently modified by the schedule - the two states are always kept separate.
+> Toggling the Auto Dark Schedule ON or OFF immediately re-evaluates current schedule conditions against the active time:
+> - **Turning OFF the schedule:** Immediately restores your manual **Enable DarQ** settings and per-app force dark preferences.
+> - **Turning ON the schedule:** Instantly checks current time against your schedule (or location-based sunset/sunrise) and applies the correct light or dark mode state.
+> - Your manual **Enable DarQ** toggle and whitelist selections are never permanently overwritten by the schedule.
 
 Please read the Frequently Asked Questions sections in the app or [here](https://github.com/Arora-Sir/DarQ-Reborn/blob/master/app/src/main/assets/faq.md) for more information and answers.
 
