@@ -104,9 +104,12 @@ class DarqService(private val serviceType: DarqServiceConnectionProvider.Service
         }
         lifecycleScope.launch {
             currentApp.collect {
-                if(it == null && !sendAppCloses) return@collect
                 // Only apply force dark if DarQ is enabled AND Auto Dark is not blocking (light period)
-                if (!isEnabled || isAutoDarkBlocking) return@collect
+                if (!isEnabled || isAutoDarkBlocking) {
+                    setForceDarkEnabled(false)
+                    return@collect
+                }
+                if(it == null && !sendAppCloses) return@collect
                 setForceDarkEnabled(appWhitelist.contains(it))
             }
         }
@@ -145,9 +148,12 @@ class DarqService(private val serviceType: DarqServiceConnectionProvider.Service
             // false = Auto Dark schedule is in light period, so block force dark
             isAutoDarkBlocking = !ipcSetting.autoDarkManagedEnabled
         }
+        if(!isEnabled || isAutoDarkBlocking) {
+            setForceDarkEnabled(false)
+        }
         if(ipcSetting.alwaysForceDark != null) {
             isAlwaysForceDarkEnabled = ipcSetting.alwaysForceDark
-            if(isAlwaysForceDarkEnabled){
+            if(isAlwaysForceDarkEnabled && isEnabled && !isAutoDarkBlocking){
                 setForceDarkEnabled(true)
             }
         }

@@ -104,8 +104,12 @@ class DarqAutoDarkForegroundService: LifecycleService() {
                     restorePreAutoDarkState()
                 }
                 2 -> {
-                    // Custom Schedule Mode: always evaluate state for current time
-                    val isDark = AutoDarkUtils.isCustomScheduleDark(settings.autoDarkStartTime, settings.autoDarkEndTime)
+                    // Custom Schedule Mode: always evaluate state for current time, unless triggered by an alarm with specific intent
+                    val isDark = if (intent?.hasExtra(KEY_ENABLE_DARK) == true) {
+                        intent.getBooleanExtra(KEY_ENABLE_DARK, false)
+                    } else {
+                        AutoDarkUtils.isCustomScheduleDark(settings.autoDarkStartTime, settings.autoDarkEndTime)
+                    }
                     applySchedulePeriod(isDark)
                     cancelAndScheduleCustomWork()
                 }
@@ -125,7 +129,7 @@ class DarqAutoDarkForegroundService: LifecycleService() {
                         } else {
                             now >= sunset && now < sunrise
                         }
-                    } else false
+                    } else settings.autoDarkManagedEnabled
 
                     applySchedulePeriod(enableDark)
                     if(sunTimes != null) {

@@ -129,6 +129,15 @@ class DarqPersistentService : LifecycleService() {
             Log.d(TAG, "Binding to Shizuku/Root service to keep it alive...")
             val result = connectionProvider.getService()
             Log.d(TAG, "Service binding result: $result")
+            if (result is DarqServiceConnectionProvider.ServiceResult.Success && settings.autoDarkTheme) {
+                try {
+                    startForegroundService(Intent(this@DarqPersistentService, com.kieronquinn.app.darq.service.autodark.DarqAutoDarkForegroundService::class.java).apply {
+                        putExtra(com.kieronquinn.app.darq.service.autodark.DarqAutoDarkForegroundService.KEY_JUST_RESCHEDULE, true)
+                    })
+                } catch (e: Exception) {
+                    Log.e(TAG, "Failed to start auto dark foreground service from persistent service", e)
+                }
+            }
         } catch (e: Exception) {
             Log.e(TAG, "Error binding to service", e)
         }

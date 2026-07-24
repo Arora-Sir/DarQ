@@ -107,6 +107,15 @@ class BootForegroundService : LifecycleService() {
                     result.reason == DarqServiceConnectionProvider.ServiceFailureReason.SHIZUKU_NOT_STARTED) {
                     showShizukuNotification()
                 }
+                if (settings.autoDarkTheme) {
+                    try {
+                        startForegroundService(Intent(this@BootForegroundService, com.kieronquinn.app.darq.service.autodark.DarqAutoDarkForegroundService::class.java).apply {
+                            putExtra(com.kieronquinn.app.darq.service.autodark.DarqAutoDarkForegroundService.KEY_JUST_RESCHEDULE, true)
+                        })
+                    } catch (e: Exception) {
+                        Log.e("BootForegroundService", "Failed to start auto dark foreground service on boot", e)
+                    }
+                }
             }
             stopForeground(true)
             stopSelf()

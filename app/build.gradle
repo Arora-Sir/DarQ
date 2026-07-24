@@ -15,7 +15,7 @@ android {
         applicationId "com.mohitarora.darqreborn"
         minSdkVersion 29
         targetSdkVersion 34
-        versionCode 315
+        versionCode 316
         versionName tagName
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         buildConfigField("String", "TAG_NAME", "\"${tagName}\"")

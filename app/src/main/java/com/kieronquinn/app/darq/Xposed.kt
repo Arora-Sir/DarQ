@@ -20,8 +20,6 @@ class Xposed : IXposedHookLoadPackage {
         private const val SHARED_PREFS_FILENAME = "${BuildConfig.APPLICATION_ID}_prefs"
     }
 
-    private var xposedSettings: XposedSettings? = null
-
     private val context by lazy {
         AndroidAppHelper.currentApplication() as Context
     }
@@ -37,10 +35,8 @@ class Xposed : IXposedHookLoadPackage {
             override fun beforeHookedMethod(param: MethodHookParam) {
                 val key = param.args[0] as? String
                 if(key == "debug.hwui.force_dark") {
-                    if(xposedSettings == null) {
-                        xposedSettings = getXposedSettings(context)
-                    }
-                    if(xposedSettings?.enabled == true) {
+                    val settings = getXposedSettings(context)
+                    if(settings?.enabled == true && !settings.isScheduleBlocking) {
                         param.result = isDarkMode
                     }
                 }
@@ -50,10 +46,8 @@ class Xposed : IXposedHookLoadPackage {
             override fun beforeHookedMethod(param: MethodHookParam) {
                 val key = param.args[0] as? String
                 if(key == "debug.hwui.force_dark") {
-                    if(xposedSettings == null) {
-                        xposedSettings = getXposedSettings(context)
-                    }
-                    if(xposedSettings?.enabled == true) {
+                    val settings = getXposedSettings(context)
+                    if(settings?.enabled == true && !settings.isScheduleBlocking) {
                         param.result = if(isDarkMode) "true" else "false"
                     }
                 }
@@ -63,10 +57,8 @@ class Xposed : IXposedHookLoadPackage {
             override fun beforeHookedMethod(param: MethodHookParam) {
                 val key = param.args[0] as? String
                 if(key == "debug.hwui.force_dark") {
-                    if(xposedSettings == null) {
-                        xposedSettings = getXposedSettings(context)
-                    }
-                    if(xposedSettings?.enabled == true) {
+                    val settings = getXposedSettings(context)
+                    if(settings?.enabled == true && !settings.isScheduleBlocking) {
                         param.result = if(isDarkMode) "true" else "false"
                     }
                 }
@@ -75,10 +67,8 @@ class Xposed : IXposedHookLoadPackage {
         XposedHelpers.findAndHookMethod(View::class.java, "setForceDarkAllowed", Boolean::class.java, object : XC_MethodHook() {
             override fun beforeHookedMethod(param: MethodHookParam) {
                 super.beforeHookedMethod(param)
-                if(xposedSettings == null) {
-                    xposedSettings = getXposedSettings(context)
-                }
-                if(xposedSettings?.enabled == true){
+                val settings = getXposedSettings(context)
+                if(settings?.enabled == true && !settings.isScheduleBlocking){
                     param.args[0] = true
                 }
             }
@@ -86,10 +76,8 @@ class Xposed : IXposedHookLoadPackage {
         XposedHelpers.findAndHookMethod(Activity::class.java, "onResume", object: XC_MethodHook(){
             override fun afterHookedMethod(param: MethodHookParam) {
                 super.afterHookedMethod(param)
-                if(xposedSettings == null) {
-                    xposedSettings = getXposedSettings(context)
-                }
-                if(xposedSettings?.enabled == true && xposedSettings?.invertStatus == true){
+                val settings = getXposedSettings(context)
+                if(settings?.enabled == true && !settings.isScheduleBlocking && settings.invertStatus == true){
                     val activity = param.thisObject as? Activity ?: return
                     if(isDarkMode) {
                         activity.window.decorView.run {
@@ -105,7 +93,8 @@ class Xposed : IXposedHookLoadPackage {
         XposedHelpers.findAndHookMethod("android.graphics.HardwareRenderer", lpparam.classLoader, "setForceDark", Boolean::class.java, object: XC_MethodHook(){
             override fun beforeHookedMethod(param: MethodHookParam) {
                 super.beforeHookedMethod(param)
-                if(xposedSettings?.enabled == true && xposedSettings?.aggressiveDark == true) {
+                val settings = getXposedSettings(context)
+                if(settings?.enabled == true && !settings.isScheduleBlocking && settings.aggressiveDark == true) {
                     Log.i(TAG, "Overriding setForceDark to $isDarkMode for ${lpparam.packageName}")
                     param.args[0] = isDarkMode
                 }
@@ -132,16 +121,20 @@ class Xposed : IXposedHookLoadPackage {
     private fun getXposedSettings(context: Context): XposedSettings? {
         return try {
             val xposedPreferences = XposedSharedPreferences(SHARED_PREFS_FILENAME)
+            (xposedPreferences.sharedPreferences as? XSharedPreferences)?.reload()
             val darqEnabled = xposedPreferences.enabled
+            val autoDarkScheduleMode = xposedPreferences.autoDarkScheduleMode
+            val autoDarkManagedEnabled = xposedPreferences.autoDarkManagedEnabled
+            val isScheduleBlocking = autoDarkScheduleMode != 0 && !autoDarkManagedEnabled
             val appSelected = xposedPreferences.enabledApps.contains(context.packageName)
             val alwaysUseForceDark = xposedPreferences.alwaysForceDark
             Log.d(TAG, "Enabled apps ${xposedPreferences.enabledApps.joinToString(", ")}")
             return if(!darqEnabled || (!appSelected && !alwaysUseForceDark)){
-                XposedSettings(enabled = false).apply {
+                XposedSettings(enabled = false, isScheduleBlocking = isScheduleBlocking).apply {
                     Log.d(TAG, "Got XposedSettings disabled for ${context.packageName}")
                 }
             }else{
-                XposedSettings(enabled = true, aggressiveDark = xposedPreferences.xposedAggressiveDark, invertStatus = xposedPreferences.xposedInvertStatus).apply {
+                XposedSettings(enabled = true, isScheduleBlocking = isScheduleBlocking, aggressiveDark = xposedPreferences.xposedAggressiveDark, invertStatus = xposedPreferences.xposedInvertStatus).apply {
                     Log.d(TAG, "Got XposedSettings enabled for ${context.packageName}")
                 }
             }
